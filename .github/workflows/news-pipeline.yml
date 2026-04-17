@@ -2,9 +2,11 @@ name: News Pipeline
 
 on:
   schedule:
-    # Runs every 6 hours — at midnight, 6am, noon, 6pm UTC
     - cron: '0 0,6,12,18 * * *'
-  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   fetch-news:
@@ -18,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install
