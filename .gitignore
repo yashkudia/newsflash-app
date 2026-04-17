@@ -1,0 +1,5 @@
+node_modules/
+.env
+Icons/
+.DS_Store
+news-engine/.env

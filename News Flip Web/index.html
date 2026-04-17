@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>News Flip — Fast News for America</title>
+<meta name="description" content="Get the news in a few words. News Flip delivers AI-summarized, swipeable news cards covering trending, sports, politics, tech, and more.">
+<!-- OG Tags for rich share previews -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="News Flip — Fast News for America">
+<meta property="og:description" content="Swipe through AI-summarized news cards. Every story in a quick read.">
+<meta property="og:image" content="icon-512.png">
+<meta property="og:url" content="https://newsflash-app-three.vercel.app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="News Flip — Fast News for America">
+<meta name="twitter:description" content="Swipe through AI-summarized news cards. Every story in a quick read.">
+<meta name="twitter:image" content="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1117">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #09090b;
+  --surface: #131316;
+  --card-bg: #18181b;
+  --border: rgba(255,255,255,0.04);
+  --border2: rgba(255,255,255,0.07);
+  --text: #fafafa;
+  --muted: #52525b;
+  --dim: #a1a1aa;
+  --accent: #818cf8;
+  --accent2: #c084fc;
+  --accent-grad: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+  --accent-dim: rgba(129,140,248,0.10);
+  --accent-text: #ffffff;
+  --green: #34d399;
+  --amber: #fbbf24;
+  --purple: #c084fc;
+  --pink: #f472b6;
+  --teal: #2dd4bf;
+  --blue: #60a5fa;
+  --sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --serif: 'Outfit', system-ui, sans-serif;
+  --font-scale: 1;
+}
+
+.light {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --card-bg: #ffffff;
+  --border: rgba(0,0,0,0.04);
+  --border2: rgba(0,0,0,0.07);
+  --text: #09090b;
+  --muted: #a1a1aa;
+  --dim: #52525b;
+  --accent: #6366f1;
+  --accent2: #a855f7;
+  --accent-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  --accent-dim: rgba(99,102,241,0.06);
+  --accent-text: #ffffff;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { overflow:hidden; }
+
+body {
+  background: var(--bg);
+  font-family: var(--sans);
+  overflow: hidden;
+  width: 100vw;
+  height: 100dvh;
+  overscroll-behavior: none;
+  position: fixed;
+  inset: 0;
+}
+
+.app-container {
+  width: 100%;
+  height: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ── Tabs — pill style with inverted active ── */
+.tabs-scroll {
+  overflow-x:auto; scrollbar-width:none;
+  padding:8px 14px 4px; flex-shrink:0;
+}
+.tabs-scroll::-webkit-scrollbar { display:none; }
+.tabs { display:flex; gap:6px; width:max-content; }
+
+.tab-pill {
+  display:flex; align-items:center; gap:5px;
+  padding:7px 15px;
+  border-radius:100px;
+  border:none;
+  background:transparent;
+  font-size:13px; font-weight:500;
+  color:var(--muted); cursor:pointer;
+  transition:all .2s cubic-bezier(.25,1,.5,1); white-space:nowrap; user-select:none;
+  font-family:var(--sans);
+}
+.tab-pill.active {
+  background:var(--text); color:var(--bg); font-weight:600;
+}
+.tab-pill.sub-pill { font-size:12px; padding:5px 13px; }
+.tab-pill.sub-pill.active {
+  background:var(--text); color:var(--bg); font-weight:600;
+}
+.tab-pill:active { opacity:.7; transform:scale(.94); }
+.tab-pill svg { width:0; height:0; display:none; }
+
+/* ── Feed ── */
+.feed-outer { flex:1; overflow:hidden; position:relative; }
+.feed { position:relative; width:100%; height:100%; touch-action:none; perspective:1200px; }
+
+/* ── Pull to refresh ── */
+.pull-indicator {
+  position:absolute; top:8px; left:50%; transform:translateX(-50%);
+  width:36px; height:36px; border-radius:50%;
+  background:var(--surface); border:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .2s, transform .2s; z-index:20;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+}
+.pull-indicator.show { opacity:1; }
+.pull-indicator.refreshing svg { animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.pull-indicator svg { width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2; stroke-linecap:round; }
+
+/* ── Card — clean, immersive, magazine-style ── */
+.card {
+  position:absolute;
+  inset: 0 8px;
+  display:flex; flex-direction:column;
+  background: var(--card-bg);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.06),
+    0 12px 40px rgba(0,0,0,0.28);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s, opacity 0.3s;
+  will-change: transform;
+  cursor: grab;
+  transform-style: preserve-3d;
+  border:1px solid var(--border);
+}
+.light .card {
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 12px 40px rgba(0,0,0,0.07);
+}
+.card:active { cursor:grabbing; }
+.card.dragging {
+  transition: none !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1), 0 32px 72px rgba(0,0,0,0.4);
+  z-index: 100;
+}
+
+.card.exit-up   { transform:translateY(-120%) rotateX(8deg); opacity:0; }
+.card.exit-down { transform:translateY(120%) rotateX(-8deg); opacity:0; }
+.card.from-below { animation:fromBelow .4s cubic-bezier(.25,1,.5,1) both; }
+.card.from-above { animation:fromAbove .4s cubic-bezier(.25,1,.5,1) both; }
+@keyframes fromBelow { from{transform:translateY(70%);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes fromAbove { from{transform:translateY(-70%);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.card.settle { animation:settle .2s ease-out both; }
+@keyframes settle { from{transform:scale(.985)} to{transform:scale(1)} }
+
+/* ── Card image — full-bleed hero ── */
+.card-img-wrap {
+  position:relative; width:100%; flex:0 0 var(--img-flex, 38%); overflow:hidden;
+  background:var(--surface);
+}
+.card-img-real {
+  width:100%; height:100%;
+  object-fit:cover; display:block;
+  position:absolute; inset:0;
+  opacity:0; transition:opacity .5s ease;
+}
+.card-img-real.loaded { opacity:1; }
+.card-img-blur {
+  position:absolute; inset:-10px;
+  width:calc(100% + 20px); height:calc(100% + 20px);
+  object-fit:cover; filter:blur(28px) saturate(1.4) brightness(0.6);
+  transform:scale(1.15); opacity:.9;
+  transition:opacity .5s ease;
+}
+.card-img-blur.hide { opacity:0; }
+.card-img-bg {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+  background:var(--surface);
+}
+.card-img-bg svg.art { width:56px; height:56px; opacity:0.08; }
+.card-img-bg::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(to bottom, rgba(9,9,11,0) 10%, rgba(9,9,11,0.3) 50%, rgba(9,9,11,1) 95%);
+}
+.light .card-img-bg::after {
+  background:linear-gradient(to bottom, rgba(255,255,255,0) 10%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,1) 95%);
+}
+
+.card-cat-badge {
+  display:none;
+}
+.card-cat-badge svg { display:none; }
+.card-source-badge {
+  position:absolute; top:14px; right:14px; z-index:4;
+  display:flex; align-items:center; gap:4px;
+  padding:4px 10px; border-radius:100px;
+  font-size:10px; font-weight:600; color:rgba(255,255,255,.9);
+  background:rgba(0,0,0,.45); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.08);
+}
+.light .card-source-badge { background:rgba(255,255,255,.8); color:var(--text); border-color:rgba(0,0,0,.05); }
+.card-source-badge svg { width:9px; height:9px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; opacity:.6; }
+.card-time { position:absolute; bottom:14px; right:16px; z-index:4; font-size:11px; font-weight:500; color:rgba(255,255,255,.4); }
+.light .card-time { color:var(--muted); }
+
+/* ── Card body ── */
+.card-body {
+  flex:1; background:var(--card-bg);
+  display:flex; flex-direction:column;
+  padding:20px 22px 14px; overflow:hidden;
+}
+.card-brand {
+  display:none;
+}
+.card-headline {
+  font-family:var(--serif);
+  font-size:calc(21px * var(--font-scale)); font-weight:700;
+  line-height:1.22; letter-spacing:-.3px;
+  color:var(--text); margin-bottom:12px;
+}
+.card-summary {
+  font-size:calc(14.5px * var(--font-scale)); line-height:1.65;
+  color:var(--dim); font-weight:400;
+  margin-bottom: auto;
+  letter-spacing:.1px;
+}
+
+/* ── Card footer ── */
+.card-footer {
+  padding:12px 22px 14px;
+  background:var(--card-bg);
+  border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.card-actions { display:flex; gap:6px; }
+.action-btn {
+  width:42px; height:42px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface); border:none; cursor:pointer;
+  border-radius:14px; color:var(--dim);
+  transition:all .15s;
+  position:relative; overflow:visible;
+}
+.action-btn:active { transform:scale(.88); }
+.action-btn svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.action-btn.liked { background:rgba(244,63,94,.1); }
+.action-btn.liked svg { stroke:#f43f5e; fill:#f43f5e; }
+.action-btn.saved { background:var(--accent-dim); }
+.action-btn.saved svg { stroke:var(--accent); fill:var(--accent); }
+
+/* Heart burst */
+.heart-burst { position:absolute; inset:0; pointer-events:none; }
+
+/* Double-tap heart overlay */
+.like-overlay {
+  position:absolute; inset:0; z-index:20;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.like-overlay svg {
+  width:80px; height:80px; fill:#f43f5e; stroke:none;
+  opacity:0; transform:scale(0);
+  animation:heartPop .6s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes heartPop {
+  0% { opacity:0; transform:scale(0); }
+  40% { opacity:1; transform:scale(1.15); }
+  100% { opacity:0; transform:scale(.95); }
+}
+
+.read-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:11px 22px;
+  background:var(--accent-grad);
+  border:none;
+  border-radius:100px;
+  font-size:13px; font-weight:600; color:var(--accent-text);
+  cursor:pointer; transition:all .2s;
+  text-decoration:none;
+  font-family:var(--sans);
+  letter-spacing:.2px;
+}
+.read-btn:active { opacity:.8; transform:scale(.96); }
+.read-btn svg { width:13px; height:13px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ── Progress ── */
+.progress-bar { height:3px; background:var(--border); flex-shrink:0; }
+.progress-fill { height:100%; background:var(--accent-grad); border-radius:2px; transition:width .3s; }
+
+/* ── Card counter ── */
+.card-counter {
+  position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+  font-size:10px; color:var(--muted); font-weight:500; letter-spacing:.5px;
+  pointer-events:none; z-index:10;
+}
+/* ── Swipe hints ── */
+.swipe-hint {
+  position:absolute; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:10;
+}
+.swipe-hint.top { top:8px; }
+.swipe-hint.bottom { bottom:48px; }
+.swipe-hint.left { top:50%; transform:translateY(-50%); left:10px; flex-direction:row; }
+.swipe-hint.right { top:50%; transform:translateY(-50%); right:10px; left:auto; flex-direction:row; }
+.swipe-hint.show { opacity:.5; }
+.swipe-hint svg { width:18px; height:18px; stroke:var(--dim); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.swipe-hint span { font-size:10px; color:var(--text); font-weight:500; }
+
+/* ── Skeleton & Error ── */
+.skeleton { background:var(--card-bg); position:absolute; inset:0 8px; border-radius:28px; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--border);}
+.skel-img { flex:0 0 38%; background:var(--surface); }
+.skel-body { flex:1; padding:22px; display:flex; flex-direction:column; gap:12px; }
+.skel-line { border-radius:8px; background:rgba(255,255,255,.03); animation:shimmer 1.5s ease infinite alternate; }
+.light .skel-line { background:rgba(0,0,0,.06); }
+@keyframes shimmer { from{opacity:.4} to{opacity:.9} }
+
+.error-state {
+  position:absolute; inset:0; background: var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; padding:32px;
+}
+.error-state svg { width:40px; height:40px; stroke:var(--muted); fill:none; stroke-width:1.4; }
+.error-title { font-size:17px; font-weight:600; color:var(--dim); }
+.error-sub { font-size:13px; color:var(--muted); text-align:center; line-height:1.6; }
+.retry-btn { margin-top:10px; padding:11px 28px; background:var(--accent-dim); border:none; border-radius:100px; font-size:13px; font-weight:600; color:var(--accent); cursor:pointer; font-family:var(--sans); }
+
+/* ── Bottom bar ── */
+.bottom-bar {
+  display:flex; justify-content:space-evenly; align-items:center;
+  padding:6px 0;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom));
+  background:transparent;
+  flex-shrink:0; position:relative; z-index:50;
+}
+.bottom-btn {
+  width:48px; height:48px;
+  display:flex; align-items:center; justify-content:center;
+  background:none; border:none; cursor:pointer;
+  border-radius:50%;
+  color:var(--muted);
+  transition:color .2s, transform .1s;
+  position:relative;
+}
+.bottom-btn:active { transform:scale(.85); }
+.bottom-btn svg {
+  width:22px; height:22px;
+  fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round;
+  position:relative; z-index:1;
+}
+.bottom-btn.active { color:var(--accent); }
+.bottom-btn.active::after {
+  content:'';
+  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  width:4px; height:4px; border-radius:50%;
+  background:var(--accent-grad);
+}
+
+/* ── Profile overlay ── */
+.profile-overlay {
+  position:absolute; inset:0; background:var(--bg); z-index:90;
+  display:flex; flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.32,.72,0,1);
+}
+.profile-overlay.open { transform:translateY(0); }
+.profile-top {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 20px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.profile-title { font-family:var(--serif); font-size:20px; font-weight:700; color:var(--text); }
+.profile-close {
+  background:none; border:none; cursor:pointer; color:var(--dim); padding:4px;
+}
+.profile-close svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.profile-content { flex:1; overflow-y:auto; padding:20px; }
+
+.profile-section { margin-bottom:28px; }
+.profile-section-title {
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; color:var(--muted); margin-bottom:14px;
+}
+
+.setting-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 0; border-bottom:1px solid var(--border);
+}
+.setting-label { font-size:14px; font-weight:500; color:var(--text); }
+
+/* Toggle switch */
+.toggle {
+  width:44px; height:24px; border-radius:12px;
+  background:var(--border2); cursor:pointer;
+  position:relative; transition:background .2s; border:none;
+}
+.toggle.on { background:var(--accent); }
+.toggle::after {
+  content:''; position:absolute;
+  width:20px; height:20px; border-radius:50%;
+  background:white; top:2px; left:2px;
+  transition:transform .2s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.toggle.on::after { transform:translateX(20px); }
+
+/* Font size selector */
+.font-sizes { display:flex; gap:6px; }
+.font-size-btn {
+  padding:6px 14px; border-radius:16px;
+  border:1px solid var(--border2); background:var(--surface);
+  font-size:12px; font-weight:600; color:var(--dim);
+  cursor:pointer; transition:all .15s;
+}
+.font-size-btn.active { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+
+/* Language selector */
+.lang-btn {
+  padding:6px 14px; border-radius:16px;
+  border:1px solid var(--border2); background:var(--surface);
+  font-size:12px; font-weight:600; color:var(--dim);
+  cursor:pointer; transition:all .15s; font-family:var(--sans);
+}
+.lang-btn.active { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+
+/* Saved articles in profile */
+.saved-list { display:flex; flex-direction:column; gap:8px; }
+.saved-item {
+  display:flex; gap:12px; padding:12px;
+  background:var(--surface); border-radius:12px;
+  cursor:pointer; align-items:center;
+}
+.saved-item-img {
+  width:48px; height:48px; border-radius:8px;
+  object-fit:cover; flex-shrink:0; background:var(--card-bg);
+}
+.saved-item-body { flex:1; min-width:0; }
+.saved-item-title {
+  font-size:13px; font-weight:600; color:var(--text);
+  line-height:1.3; margin-bottom:3px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.saved-item-meta { font-size:11px; color:var(--muted); }
+.saved-empty { font-size:13px; color:var(--muted); text-align:center; padding:24px 0; }
+
+/* Profile action buttons */
+.profile-action-btn {
+  padding:7px 16px; border-radius:10px;
+  border:1px solid var(--border2); background:var(--surface);
+  font-size:12px; font-weight:600; color:var(--dim);
+  cursor:pointer; font-family:var(--sans);
+  transition:all .15s;
+}
+.profile-action-btn:active { transform:scale(.95); opacity:.8; }
+.profile-action-btn.danger { color:#f87171; border-color:rgba(248,113,113,.3); }
+.profile-action-btn.danger:active { background:rgba(248,113,113,.1); }
+
+/* About section */
+.about-block { padding:4px 0; }
+.about-logo {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:6px;
+}
+.about-name {
+  font-family:var(--serif); font-size:18px; font-weight:700; color:var(--text);
+}
+.about-tagline {
+  font-size:11px; color:var(--accent); font-weight:600;
+  text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;
+}
+.about-desc {
+  font-size:13px; color:var(--dim); line-height:1.6; margin-bottom:12px;
+}
+.about-version {
+  font-size:11px; color:var(--muted);
+}
+.saved-item-remove {
+  width:32px; height:32px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:none; border:none; cursor:pointer;
+  color:var(--muted); border-radius:8px;
+  transition:color .15s, background .15s;
+}
+.saved-item-remove:active { background:var(--border); color:#f87171; }
+.saved-item-remove svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+
+/* ── Search overlay ── */
+.search-overlay {
+  position:absolute; inset:0; background:var(--bg); z-index:90;
+  display:flex; flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.32,.72,0,1);
+}
+.search-overlay.open { transform:translateY(0); }
+.search-top {
+  display:flex; align-items:center; gap:12px;
+  padding:16px 20px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.search-input-wrap {
+  flex:1; display:flex; align-items:center; gap:10px;
+  background:var(--surface); border-radius:12px;
+  padding:10px 14px; border:1px solid var(--border2);
+}
+.search-input-wrap svg { width:16px; height:16px; flex-shrink:0; fill:none; stroke:var(--muted); stroke-width:1.8; }
+.search-input {
+  flex:1; background:none; border:none; outline:none;
+  font-size:15px; color:var(--text); font-family:var(--sans);
+}
+.search-input::placeholder { color:var(--muted); }
+.search-cancel {
+  background:none; border:none; cursor:pointer;
+  font-size:14px; font-weight:600; color:var(--accent); font-family:var(--sans);
+  padding:4px;
+}
+.search-results { flex:1; overflow-y:auto; padding:12px 20px 20px; }
+.search-empty {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100%; gap:12px; padding-bottom:60px;
+}
+.search-empty svg { width:44px; height:44px; stroke:var(--muted); fill:none; stroke-width:1.4; }
+.search-empty-text { font-size:15px; font-weight:500; color:var(--dim); }
+.search-empty-sub { font-size:13px; color:var(--muted); }
+.search-result-item {
+  display:flex; gap:14px; padding:14px 0;
+  border-bottom:1px solid var(--border); cursor:pointer; align-items:flex-start;
+}
+.search-result-img { width:56px; height:56px; border-radius:10px; object-fit:cover; flex-shrink:0; background:var(--surface); }
+.search-result-img-placeholder { width:56px; height:56px; border-radius:10px; background:var(--surface); flex-shrink:0; }
+.search-result-body { flex:1; min-width:0; }
+.search-result-cat { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:5px; }
+.search-result-title { font-family:var(--serif); font-size:14px; font-weight:700; line-height:1.35; color:var(--text); margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.search-result-source { font-size:11px; color:var(--muted); }
+
+/* ── Collection page (Liked / Bookmarked) ── */
+.collection-overlay {
+  position:absolute; inset:0; background:var(--bg); z-index:95;
+  display:none; flex-direction:column;
+  opacity:0; transition:opacity .25s ease;
+}
+.collection-overlay.open { display:flex; opacity:1; }
+.collection-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.collection-back {
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  background:none; border:none; cursor:pointer; border-radius:50%; color:var(--text);
+}
+.collection-back svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.collection-back:active { opacity:.6; }
+.collection-title { font-family:var(--serif); font-size:18px; font-weight:700; color:var(--text); }
+.collection-body { flex:1; overflow-y:auto; padding:16px 20px 40px; -webkit-overflow-scrolling:touch; }
+.collection-group { margin-bottom:20px; }
+.collection-group-header {
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  margin-bottom:10px; padding-left:2px;
+}
+.collection-item {
+  display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border);
+  cursor:pointer; align-items:center;
+}
+.collection-item:last-child { border-bottom:none; }
+.collection-item-img { width:60px; height:60px; border-radius:12px; object-fit:cover; flex-shrink:0; background:var(--surface); }
+.collection-item-body { flex:1; min-width:0; }
+.collection-item-title { font-family:var(--serif); font-size:14px; font-weight:600; line-height:1.35; color:var(--text); margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.collection-item-meta { font-size:11px; color:var(--muted); }
+.collection-item-remove {
+  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+  background:none; border:none; cursor:pointer; border-radius:50%; flex-shrink:0;
+}
+.collection-item-remove:active { opacity:.5; }
+.collection-item-remove svg { width:14px; height:14px; fill:none; stroke:var(--muted); stroke-width:2; stroke-linecap:round; }
+.collection-empty {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; padding:60px 20px; text-align:center;
+}
+.collection-empty svg { width:48px; height:48px; fill:none; stroke:var(--muted); stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; }
+.collection-empty-title { font-size:16px; font-weight:600; color:var(--dim); }
+.collection-empty-sub { font-size:13px; color:var(--muted); line-height:1.5; }
+
+/* ── Onboard ── */
+.onboard {
+  position:absolute; inset:0; background:rgba(15,17,23,0.96);
+  backdrop-filter:blur(16px); z-index:200;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:40px;
+}
+.light .onboard { background:rgba(245,245,247,0.96); }
+.onboard-logo {
+  font-family:var(--serif); font-size:36px; font-weight:900;
+  color:var(--text); text-align:center; letter-spacing:-.5px;
+}
+.onboard-tagline {
+  font-size:12px; color:var(--muted); text-align:center;
+  margin-top:6px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600;
+}
+
+.onboard-gestures {
+  display:flex; flex-direction:column; gap:28px;
+  width:100%; padding:0 48px;
+}
+.onboard-gesture {
+  display:flex; align-items:center; gap:16px;
+}
+.gesture-anim {
+  width:48px; height:48px; flex-shrink:0;
+  border-radius:14px; background:var(--surface);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.gesture-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--accent); position:absolute;
+}
+.gesture-dot.swipe-ud { animation:gestureUD 2s ease-in-out infinite; }
+.gesture-dot.swipe-lr { animation:gestureLR 2s ease-in-out infinite; }
+@keyframes gestureUD {
+  0%,100% { transform:translateY(-10px); }
+  50% { transform:translateY(10px); }
+}
+@keyframes gestureLR {
+  0%,100% { transform:translateX(-10px); }
+  50% { transform:translateX(10px); }
+}
+.gesture-text { flex:1; }
+.gesture-label { font-size:15px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.gesture-sub { font-size:12px; color:var(--muted); line-height:1.4; }
+
+.onboard-btn {
+  padding:14px 44px; background:var(--accent-grad); border:none;
+  border-radius:100px; font-size:15px; font-weight:600;
+  color:var(--accent-text); cursor:pointer; margin-top:8px;
+  transition:transform .1s; font-family:var(--sans);
+  position:relative; z-index:210; touch-action:manipulation;
+  letter-spacing:.3px;
+}
+.onboard-btn:active { transform:scale(.96); }
+.onboard.hidden { display:none; }
+
+/* ── Splash screen ── */
+.splash {
+  position:fixed; inset:0; z-index:999;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:12px;
+  transition:opacity .4s, visibility .4s;
+}
+.splash.hide { opacity:0; visibility:hidden; }
+.splash-icon {
+  width:64px; height:64px; border-radius:16px;
+  background:var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  animation:splashPulse 1.2s ease-in-out infinite;
+}
+.splash-icon svg { width:32px; height:32px; }
+.splash-name { font-family:var(--serif); font-size:24px; font-weight:700; color:var(--text); }
+@keyframes splashPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+
+/* ── "All caught up" state ── */
+.caught-up {
+  position:absolute; inset:0; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; padding:32px;
+}
+.caught-up svg { width:40px; height:40px; stroke:var(--accent); fill:none; stroke-width:1.4; }
+.caught-up-title { font-size:17px; font-weight:600; color:var(--text); }
+.caught-up-sub { font-size:13px; color:var(--muted); text-align:center; line-height:1.6; }
+
+/* ── Onboarding interests picker ── */
+.interest-grid {
+  display:flex; flex-wrap:wrap; gap:10px;
+  justify-content:center; width:100%; padding:0 24px;
+}
+.interest-chip {
+  padding:10px 20px; border-radius:100px;
+  border:1px solid var(--border2); background:var(--surface);
+  font-size:13px; font-weight:500; color:var(--dim);
+  cursor:pointer; transition:all .2s; user-select:none;
+  font-family:var(--sans);
+}
+.interest-chip.selected {
+  background:var(--accent-dim); border-color:var(--accent); color:var(--accent); font-weight:600;
+}
+.interest-chip:active { transform:scale(.95); }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+  .card { transition:none !important; }
+  .gesture-dot { animation:none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Splash screen -->
+<div class="splash" id="splash">
+  <img src="icon-192.png" alt="News Flip" style="width:80px;height:80px;border-radius:18px;">
+</div>
+
+<div class="app-container" id="app" role="main" aria-label="News Flip app">
+  <div class="tabs-scroll" role="tablist" aria-label="News categories">
+    <div class="tabs" id="tabs">
+      <div class="tab-pill active" data-cat="trending"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> Trending</div>
+      <div class="tab-pill" data-cat="foryou"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> For You</div>
+      <div class="tab-pill" data-cat="all"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l5 3"/></svg> All</div>
+      <div class="tab-pill" data-cat="global"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Global</div>
+      <div class="tab-pill" data-cat="sports"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3c2.5 3 2.5 15 0 18M3 12c3 2.5 15 2.5 18 0"/></svg> Sports</div>
+      <div class="tab-pill" data-cat="economy"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Economy</div>
+      <div class="tab-pill" data-cat="entertainment"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> Entertain.</div>
+      <div class="tab-pill" data-cat="politics"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Politics</div>
+      <div class="tab-pill" data-cat="science"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg> Science</div>
+      <div class="tab-pill" data-cat="tech"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Tech</div>
+    </div>
+  </div>
+
+  <div class="tabs-scroll" id="subTabsWrap" style="display:none; margin-top:-2px;">
+    <div class="tabs" id="subTabs">
+      <div class="tab-pill sub-pill active" data-sub="all">All Sports</div>
+      <div class="tab-pill sub-pill" data-sub="nfl">NFL</div>
+      <div class="tab-pill sub-pill" data-sub="nba">NBA</div>
+      <div class="tab-pill sub-pill" data-sub="mlb">MLB</div>
+      <div class="tab-pill sub-pill" data-sub="nhl">NHL</div>
+      <div class="tab-pill sub-pill" data-sub="soccer">Soccer</div>
+      <div class="tab-pill sub-pill" data-sub="mma">MMA</div>
+    </div>
+  </div>
+
+  <div class="feed-outer" role="region" aria-label="News feed" aria-live="polite">
+    <div class="pull-indicator" id="pullIndicator">
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/><polyline points="21 3 21 9 15 9"/></svg>
+    </div>
+    <div class="swipe-hint top" id="hint-up"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg><span>previous</span></div>
+    <div class="swipe-hint bottom" id="hint-dn"><span>next story</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    <div class="swipe-hint left" id="hint-left"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg><span id="hint-left-label">prev tab</span></div>
+    <div class="swipe-hint right" id="hint-right"><span id="hint-right-label">next tab</span><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>
+
+    <div class="feed" id="feed"></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  </div>
+
+  <nav class="bottom-bar" role="navigation" aria-label="Main navigation">
+    <button class="bottom-btn active" data-nav="feed" aria-label="Home feed"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+    <button class="bottom-btn" data-nav="search" aria-label="Search stories"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+    <button class="bottom-btn" data-nav="profile" aria-label="Profile and settings"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+  </nav>
+
+  <div class="onboard" id="onboard" role="dialog" aria-label="Welcome to News Flip">
+    <div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <img src="icon-192.png" alt="News Flip" style="width:64px;height:64px;border-radius:14px;">
+      <div class="onboard-logo">News Flip</div>
+      <div class="onboard-tagline">Fast news for America</div>
+      </div>
+    </div>
+    <div class="onboard-gestures">
+      <div class="onboard-gesture">
+        <div class="gesture-anim"><div class="gesture-dot swipe-ud"></div></div>
+        <div class="gesture-text">
+          <div class="gesture-label">Swipe up / down</div>
+          <div class="gesture-sub">Flip between stories</div>
+        </div>
+      </div>
+      <div class="onboard-gesture">
+        <div class="gesture-anim"><div class="gesture-dot swipe-lr"></div></div>
+        <div class="gesture-text">
+          <div class="gesture-label">Swipe left / right</div>
+          <div class="gesture-sub">Switch categories</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Pick your interests</div>
+    </div>
+    <div class="interest-grid" id="interestGrid">
+      <div class="interest-chip" data-interest="sports">Sports</div>
+      <div class="interest-chip" data-interest="tech">Tech</div>
+      <div class="interest-chip" data-interest="politics">Politics</div>
+      <div class="interest-chip" data-interest="economy">Economy</div>
+      <div class="interest-chip" data-interest="entertainment">Entertainment</div>
+      <div class="interest-chip" data-interest="science">Science</div>
+      <div class="interest-chip" data-interest="health">Health</div>
+    </div>
+    <button class="onboard-btn" id="dismissBtn">Start Flipping</button>
+  </div>
+
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-top">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input class="search-input" id="searchInput" type="text" placeholder="Search stories..." autocomplete="off"/>
+      </div>
+      <button class="search-cancel" id="searchCancel">Cancel</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div class="profile-overlay" id="profileOverlay">
+    <div class="profile-top">
+      <div class="profile-title">Profile</div>
+      <button class="profile-close" id="profileClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="profile-content">
+      <div class="profile-section">
+        <div class="profile-section-title">Appearance</div>
+        <div class="setting-row">
+          <span class="setting-label">Light mode</span>
+          <button class="toggle" id="themeToggle"></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Text size</span>
+          <div class="font-sizes">
+            <button class="font-size-btn" data-scale="0.9">S</button>
+            <button class="font-size-btn active" data-scale="1">M</button>
+            <button class="font-size-btn" data-scale="1.15">L</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Language</span>
+          <div class="font-sizes">
+            <button class="lang-btn active" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="es">ES</button>
+          </div>
+        </div>
+      </div>
+      <div class="profile-section">
+        <div class="setting-row" style="cursor:pointer" onclick="openCollectionPage('liked')">
+          <span class="setting-label" style="display:flex;align-items:center;gap:8px">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#f43f5e;stroke:none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Liked stories
+            <span id="likedCount" style="font-size:11px;color:var(--muted);font-weight:400"></span>
+          </span>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="setting-row" style="cursor:pointer" onclick="openCollectionPage('saved')">
+          <span class="setting-label" style="display:flex;align-items:center;gap:8px">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--accent);stroke:none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            Bookmarked stories
+            <span id="savedCount" style="font-size:11px;color:var(--muted);font-weight:400"></span>
+          </span>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-section-title">Data</div>
+        <div class="setting-row">
+          <span class="setting-label">Reset preferences</span>
+          <button class="profile-action-btn" id="resetPrefsBtn">Reset</button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Clear all data</span>
+          <button class="profile-action-btn danger" id="clearDataBtn">Clear</button>
+        </div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-section-title">About</div>
+        <div class="about-block">
+          <div class="about-logo">
+            <img src="icon-192.png" alt="News Flip" style="width:36px;height:36px;border-radius:8px;flex-shrink:0">
+            <span class="about-name">News Flip</span>
+          </div>
+          <div class="about-tagline">Fast news for America</div>
+          <div class="about-desc">News Flip delivers fast, AI-summarized news in a swipeable card format. Stay informed in seconds, not minutes. Every story is condensed to a quick read so you get the facts without the noise.</div>
+          <div class="about-version">Version 1.0.0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Collection Page (Liked / Bookmarked) -->
+  <div class="collection-overlay" id="collectionOverlay">
+    <div class="collection-header">
+      <button class="collection-back" id="collectionBack">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="collection-title" id="collectionTitle">Liked stories</div>
+      <div style="width:36px"></div>
+    </div>
+    <div class="collection-body" id="collectionBody"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── SUPABASE CONFIG ───────────────────────────────────────────────────────
+const SUPABASE_URL      = 'https://jrkunvdzkszuebjihukn.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impya3VudmR6a3N6dWViamlodWtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDcyOTgsImV4cCI6MjA5MDk4MzI5OH0.x3bu0OAmi1fu_4da2cuL5BgFeXlscxW6_U_2mJkGoU0';
+
+const MOCK_ARTICLES = [{
+  id:1, category:'trending',
+  title:'Waiting for the first stories...',
+  summary:'Your pipeline is setting up. Once it runs, real news will appear here automatically.',
+  full:'Run node news-pipeline.js to populate your Supabase database.',
+  source:'News Flip', time:'Just now', url:'#', image_url:null,
+}];
+
+// ─── CATEGORY CONFIG ──────────────────────────────────────────────────────
+const CAT_CONFIG = {
+  trending:      { color:'#7eb8f7', bg:'rgba(126,184,247,.14)', label:'Trending',      bgDark:'#151c28' },
+  foryou:        { color:'#f472b6', bg:'rgba(244,114,182,.14)', label:'For You',       bgDark:'#1e1020' },
+  global:        { color:'#38bdf8', bg:'rgba(56,189,248,.14)', label:'Global',        bgDark:'#0c1824' },
+  sports:        { color:'#fbbf24', bg:'rgba(251,191,36,.13)',  label:'Sports',        bgDark:'#201a0a' },
+  economy:       { color:'#68d391', bg:'rgba(104,211,145,.13)', label:'Economy',       bgDark:'#0e1e14' },
+  entertainment: { color:'#f9a8d4', bg:'rgba(249,168,212,.13)',label:'Entertainment',  bgDark:'#1e1020' },
+  politics:      { color:'#93c5fd', bg:'rgba(147,197,253,.13)', label:'Politics',      bgDark:'#101828' },
+  science:       { color:'#5eead4', bg:'rgba(94,234,212,.13)',  label:'Science',       bgDark:'#0c1e1c' },
+  tech:          { color:'#c4b5fd', bg:'rgba(196,181,253,.13)', label:'Tech',          bgDark:'#161028' },
+  all:           { color:'#94a3b8', bg:'rgba(148,163,184,.11)', label:'All',           bgDark:'#1a1d24' },
+};
+
+const CAT_ART = {
+  trending:     `<svg class="art" viewBox="0 0 80 80"><polyline points="10 60 30 35 45 50 65 20" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="55 20 65 20 65 30" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  foryou:       `<svg class="art" viewBox="0 0 80 80"><path d="M40 18 C30 8 10 14 10 32 C10 50 40 66 40 66 C40 66 70 50 70 32 C70 14 50 8 40 18Z" stroke="white" stroke-width="2.5" fill="none"/></svg>`,
+  global:       `<svg class="art" viewBox="0 0 80 80"><circle cx="40" cy="40" r="28" stroke="white" stroke-width="2.5" fill="none"/><line x1="12" y1="40" x2="68" y2="40" stroke="white" stroke-width="2"/><path d="M40 12 C52 24 52 56 40 68" stroke="white" stroke-width="2" fill="none"/><path d="M40 12 C28 24 28 56 40 68" stroke="white" stroke-width="2" fill="none"/><line x1="18" y1="26" x2="62" y2="26" stroke="white" stroke-width="1.5"/><line x1="18" y1="54" x2="62" y2="54" stroke="white" stroke-width="1.5"/></svg>`,
+  sports:       `<svg class="art" viewBox="0 0 80 80"><circle cx="40" cy="40" r="28" stroke="white" stroke-width="2.5" fill="none"/><path d="M40 12 C50 24 50 56 40 68" stroke="white" stroke-width="2" fill="none"/><path d="M12 40 C24 30 56 30 68 40" stroke="white" stroke-width="2" fill="none"/></svg>`,
+  economy:      `<svg class="art" viewBox="0 0 80 80"><polyline points="15 55 30 35 45 45 60 20 70 25" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  entertainment:`<svg class="art" viewBox="0 0 80 80"><polygon points="28 20 60 40 28 60" stroke="white" stroke-width="2.5" fill="none" stroke-linejoin="round"/></svg>`,
+  politics:     `<svg class="art" viewBox="0 0 80 80"><path d="M40 10 L20 35 H30 V65 H50 V35 H60 Z" stroke="white" stroke-width="2.5" fill="none" stroke-linejoin="round"/></svg>`,
+  science:      `<svg class="art" viewBox="0 0 80 80"><circle cx="40" cy="40" r="8" stroke="white" stroke-width="2.5" fill="none"/><ellipse cx="40" cy="40" rx="28" ry="12" stroke="white" stroke-width="2" fill="none"/><ellipse cx="40" cy="40" rx="28" ry="12" stroke="white" stroke-width="2" fill="none" transform="rotate(60 40 40)"/><ellipse cx="40" cy="40" rx="28" ry="12" stroke="white" stroke-width="2" fill="none" transform="rotate(120 40 40)"/></svg>`,
+  tech:         `<svg class="art" viewBox="0 0 80 80"><rect x="12" y="18" width="56" height="36" rx="4" stroke="white" stroke-width="2.5" fill="none"/><line x1="28" y1="62" x2="52" y2="62" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="54" x2="40" y2="62" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+  all:          `<svg class="art" viewBox="0 0 80 80"><circle cx="40" cy="40" r="28" stroke="white" stroke-width="2.5" fill="none"/><line x1="12" y1="40" x2="68" y2="40" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M40 12 C50 24 50 56 40 68" stroke="white" stroke-width="2" fill="none"/><path d="M40 12 C30 24 30 56 40 68" stroke="white" stroke-width="2" fill="none"/></svg>`,
+};
+
+function getCatIcon(cat) {
+  const icons = {
+    trending:      `<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
+    foryou:        `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+    global:        `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+    sports:        `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3c2.5 3 2.5 15 0 18M3 12c3 2.5 15 2.5 18 0"/></svg>`,
+    economy:       `<svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+    entertainment: `<svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
+    politics:      `<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`,
+    science:       `<svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>`,
+    tech:          `<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+  };
+  return icons[cat] || icons.trending;
+}
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let articles = [];
+let currentIdx = 0;
+let currentCat = 'trending';
+let currentSub = 'all';
+let currentLang = localStorage.getItem('nf_lang') || 'en';
+let currentPage = 0;
+let loadingMore = false;
+let liked = new Set(JSON.parse(localStorage.getItem('nf_liked') || '[]'));
+let likedArticles = JSON.parse(localStorage.getItem('nf_liked_articles') || '{}');
+let saved = new Set(JSON.parse(localStorage.getItem('nf_saved') || '[]'));
+let savedArticles = JSON.parse(localStorage.getItem('nf_saved_articles') || '{}');
+
+// ─── PREFERENCE TRACKING ─────────────────────────────────────────────────
+// Tracks how much the user engages with each category
+// Swipe = +1, Like = +3, Bookmark = +2
+let prefs = JSON.parse(localStorage.getItem('nf_prefs') || '{}');
+
+function trackPref(category, weight = 1) {
+  if (!category || category === 'trending' || category === 'foryou' || category === 'all') return;
+  prefs[category] = (prefs[category] || 0) + weight;
+  localStorage.setItem('nf_prefs', JSON.stringify(prefs));
+}
+
+function getTopCategories(count = 3) {
+  const entries = Object.entries(prefs);
+  if (entries.length === 0) return ['sports', 'tech', 'entertainment']; // defaults for new users
+  entries.sort((a, b) => b[1] - a[1]);
+  return entries.slice(0, count).map(e => e[0]);
+}
+
+function weightedSort(articles) {
+  // Sort articles by user preference weight — higher weight categories appear first
+  // But keep some randomness so it doesn't feel stale
+  return articles.sort((a, b) => {
+    const wA = prefs[a.category] || 0;
+    const wB = prefs[b.category] || 0;
+    if (wA !== wB) return wB - wA;
+    return Math.random() - 0.5;
+  });
+}
+
+// ─── THEME & FONT PERSISTENCE ─────────────────────────────────────────────
+const savedTheme = localStorage.getItem('nf_theme');
+if (savedTheme === 'dark') {
+  // User explicitly chose dark — keep it
+} else {
+  // Default to light (first visit or explicit light choice)
+  document.documentElement.classList.add('light');
+  document.getElementById('themeToggle').classList.add('on');
+}
+const storedScale = localStorage.getItem('nf_font_scale');
+if (storedScale) {
+  document.documentElement.style.setProperty('--font-scale', storedScale);
+  const imgFlex = storedScale === '1.15' ? '28%' : storedScale === '0.9' ? '42%' : '38%';
+  document.documentElement.style.setProperty('--img-flex', imgFlex);
+  document.querySelectorAll('.font-size-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.scale === storedScale);
+  });
+}
+
+// ─── SHUFFLE ALGORITHM ─────────────────────────────────────────────────────
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// ─── RELATIVE TIME ─────────────────────────────────────────────────────────
+function relTime(iso) {
+  if (!iso) return '';
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60)    return 'Just now';
+  if (diff < 3600)  return `${Math.floor(diff/60)}m ago`;
+  if (diff < 7200)  return '1h ago';
+  if (diff < 43200) return `${Math.floor(diff/3600)}h ago`;
+  if (diff < 86400) return 'Today';
+  if (diff < 172800) return 'Yesterday';
+  return `${Math.floor(diff/86400)}d ago`;
+}
+
+// ─── SKELETON ──────────────────────────────────────────────────────────────
+function showSkeleton() {
+  document.getElementById('feed').innerHTML = `
+    <div class="skeleton">
+      <div class="skel-img"></div>
+      <div class="skel-body">
+        <div class="skel-line" style="height:10px;width:60px;animation-delay:.0s"></div>
+        <div class="skel-line" style="height:20px;width:95%;animation-delay:.1s;margin-top:6px"></div>
+        <div class="skel-line" style="height:20px;width:80%;animation-delay:.15s"></div>
+        <div class="skel-line" style="height:14px;width:95%;animation-delay:.2s;margin-top:14px"></div>
+        <div class="skel-line" style="height:14px;width:85%;animation-delay:.25s"></div>
+        <div class="skel-line" style="height:14px;width:75%;animation-delay:.3s"></div>
+      </div>
+    </div>`;
+  document.getElementById('progress').style.width = '0%';
+}
+
+// ─── LOAD FEED ─────────────────────────────────────────────────────────────
+async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
+  showSkeleton();
+  try {
+    let url, data;
+
+    if (cat === 'foryou') {
+      // For You: fetch from user's top 3 categories and merge
+      const topCats = getTopCategories(3);
+      const allResults = [];
+      for (const tc of topCats) {
+        const catUrl = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=5&category=eq.${tc}&language=eq.${currentLang}`;
+        const res = await fetch(catUrl, {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          signal: AbortSignal.timeout(5000)
+        });
+        if (res.ok) {
+          const d = await res.json();
+          if (d && d.length) allResults.push(...d);
+        }
+      }
+      data = allResults;
+      if (!data.length) throw new Error('No personalized stories yet');
+      // Sort by preference weight
+      data.sort((a, b) => (prefs[b.category] || 0) - (prefs[a.category] || 0));
+
+    } else {
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&offset=${page * 10}&language=eq.${currentLang}`;
+
+      if (cat === 'trending') {
+          url += `&is_trending=eq.true`;
+      } else if (cat === 'sports' && sub !== 'all') {
+          url += `&category=eq.sports&subcategory=eq.${sub}`;
+      } else if (cat !== 'all') {
+          url += `&category=eq.${cat}`;
+      }
+
+      const res = await fetch(url, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        signal: AbortSignal.timeout(5000)
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+      if (!data || !data.length) throw new Error('Empty response');
+    }
+
+    // Smart sorting: trending and all use weighted sort if user has prefs
+    if ((cat === 'trending' || cat === 'all') && Object.keys(prefs).length > 0) {
+      // Weighted sort — preferred categories float up, with some randomness
+      data.sort((a, b) => {
+        const wA = prefs[a.category] || 0;
+        const wB = prefs[b.category] || 0;
+        if (wA !== wB) return wB - wA;
+        return Math.random() - 0.5;
+      });
+    } else if (cat === 'trending' || cat === 'all') {
+      shuffleArray(data);
+    }
+
+    articles = data.map(a => ({
+      id: a.id || a.url, category: a.category, title: a.title,
+      summary: a.summary, full: a.full_text || '',
+      source: a.source, time: relTime(a.published_at),
+      url: a.url, image_url: a.image_url || null,
+    }));
+  } catch (err) {
+    console.warn('[NewsFlip] DB unreachable — fallback.', err.message);
+    articles = cat === 'all' || cat === 'trending'
+      ? MOCK_ARTICLES
+      : MOCK_ARTICLES.filter(a => a.category === cat);
+    if (!articles.length) articles = MOCK_ARTICLES;
+  }
+  currentIdx = 0;
+  renderCard(articles[0]);
+}
+
+// ─── RENDER CARD ───────────────────────────────────────────────────────────
+function renderCard(article, dir) {
+  if (!article) return showError('No stories found for this category.');
+  const feed    = document.getElementById('feed');
+  const cfg     = CAT_CONFIG[article.category] || CAT_CONFIG.all;
+  const art     = CAT_ART[article.category]    || CAT_ART.all;
+  const isLiked = liked.has(String(article.id));
+  const isSaved = saved.has(String(article.id));
+
+  feed.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'card' + (dir === 'up' ? ' from-below' : dir === 'down' ? ' from-above' : '');
+
+  const imgHtml = article.image_url
+    ? `<img class="card-img-blur" src="${article.image_url}" alt="" />
+       <img class="card-img-real" src="${article.image_url}" alt=""
+         onload="this.classList.add('loaded');this.previousElementSibling.classList.add('hide')"
+         onerror="this.style.display='none';this.previousElementSibling.style.display='none';this.nextElementSibling.style.display='flex'"/>
+       <div class="card-img-bg" style="background:${cfg.bgDark};display:none">${art}</div>`
+    : `<div class="card-img-bg" style="background:${cfg.bgDark}">${art}</div>`;
+
+  card.innerHTML = `
+    <div class="card-img-wrap">
+      ${imgHtml}
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(15,17,23,0) 15%,rgba(15,17,23,0.4) 55%,rgba(15,17,23,0.97) 100%);z-index:2;pointer-events:none"></div>
+      <div class="card-cat-badge" style="background:${cfg.bg};color:${cfg.color}">
+        ${getCatIcon(article.category)} ${cfg.label}
+      </div>
+      <div class="card-source-badge">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+        ${article.source}
+      </div>
+      <div class="card-time">${article.time}</div>
+    </div>
+    <div class="card-body">
+      <div class="card-brand">
+        <svg viewBox="0 0 16 16" fill="none" style="width:12px;height:12px;flex-shrink:0">
+          <rect width="16" height="16" rx="4" fill="var(--accent)"/>
+          <path d="M10 2.5 L6 8 L8.5 8 L6.5 13.5 L11 7.5 L8.5 7.5 Z" fill="${document.documentElement.classList.contains('light')?'#fff':'#0f1929'}"/>
+        </svg>
+        News Flip
+      </div>
+      <div class="card-headline">${article.title}</div>
+      <div class="card-summary">${article.summary}</div>
+    </div>
+    <div class="card-footer">
+      <div class="card-actions">
+        <button class="action-btn${isLiked?' liked':''}" data-action="like">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <button class="action-btn${isSaved?' saved':''}" data-action="save">
+          <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="action-btn" data-action="share">
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+      <a class="read-btn" href="${article.url}" target="_blank" rel="noopener noreferrer">
+        Read more
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>`;
+
+  feed.appendChild(card);
+  document.getElementById('progress').style.width = `${((currentIdx+1)/articles.length)*100}%`;
+
+  // Bounce settle
+  if (dir) {
+    card.addEventListener('animationend', () => {
+      card.classList.remove('from-below','from-above');
+      card.classList.add('settle');
+      card.addEventListener('animationend', () => card.classList.remove('settle'), {once:true});
+    }, {once:true});
+  }
+
+  // Wire up action buttons via addEventListener (not inline onclick)
+  const articleId = String(article.id);
+  const likeBtn = card.querySelector('[data-action="like"]');
+  const saveBtn = card.querySelector('[data-action="save"]');
+  const shareBtn = card.querySelector('[data-action="share"]');
+
+  likeBtn.addEventListener('click', () => toggleLike(articleId, likeBtn));
+  saveBtn.addEventListener('click', () => toggleSave(articleId, saveBtn));
+  shareBtn.addEventListener('click', () => shareCard());
+
+  // Prevent gesture system from stealing button taps
+  card.querySelectorAll('.action-btn, .read-btn').forEach(btn => {
+    btn.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
+    btn.addEventListener('mousedown', e => e.stopPropagation());
+  });
+
+  setupGestures(card);
+
+  // Preload next images
+  for (let i = currentIdx + 1; i <= currentIdx + 2; i++) {
+    if (articles[i] && articles[i].image_url) {
+      const img = new Image();
+      img.src = articles[i].image_url;
+    }
+  }
+}
+
+// ─── ERROR STATE ───────────────────────────────────────────────────────────
+function showError(msg) {
+  document.getElementById('feed').innerHTML = `
+    <div class="error-state">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="error-title">Could not load stories</div>
+      <div class="error-sub">${msg}</div>
+      <button class="retry-btn" onclick="loadFeed(currentCat)">Try again</button>
+    </div>`;
+}
+
+// ─── NAVIGATION ────────────────────────────────────────────────────────────
+function goNext() {
+  // Track that the user read this story
+  if (articles[currentIdx]) trackPref(articles[currentIdx].category, 1);
+  if (currentIdx < articles.length - 1) {
+    currentIdx++;
+    renderCard(articles[currentIdx], 'up');
+  } else if (!loadingMore) {
+    loadMoreArticles();
+  }
+}
+function goPrev() {
+  if (currentIdx <= 0) return;
+  currentIdx--;
+  renderCard(articles[currentIdx], 'down');
+}
+
+async function loadMoreArticles() {
+  loadingMore = true;
+  currentPage++;
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&offset=${currentPage * 10}&language=eq.${currentLang}`;
+    if (currentCat === 'trending') {
+        url += `&is_trending=eq.true`;
+    } else if (currentCat === 'sports' && currentSub !== 'all') {
+        url += `&category=eq.sports&subcategory=eq.${currentSub}`;
+    } else if (currentCat !== 'all') {
+        url += `&category=eq.${currentCat}`;
+    }
+
+    const res = await fetch(url, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      signal: AbortSignal.timeout(5000)
+    });
+
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (!data || !data.length) throw new Error();
+
+    if (currentCat === 'trending' || currentCat === 'all') {
+        shuffleArray(data);
+    }
+
+    const more = data.map(a => ({
+      id: a.id || a.url, category: a.category, title: a.title,
+      summary: a.summary, full: a.full_text || '',
+      source: a.source, time: relTime(a.published_at),
+      url: a.url, image_url: a.image_url || null,
+    }));
+    articles = [...articles, ...more];
+    currentIdx++;
+    renderCard(articles[currentIdx], 'up');
+  } catch {
+    // No more articles — show "all caught up"
+    showCaughtUp();
+  } finally {
+    loadingMore = false;
+  }
+}
+
+function showCaughtUp() {
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="caught-up">
+      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div class="caught-up-title">You're all caught up!</div>
+      <div class="caught-up-sub">You've read all the stories in this category. Swipe left or right to switch categories, or swipe down to go back.</div>
+    </div>`;
+  feed.appendChild(card);
+  
+  // Hide counter
+  const counter = document.getElementById('cardCounter');
+  if (counter) counter.textContent = '';
+  
+  // Enable gestures so user can swipe away
+  setupGestures(card);
+}
+
+// ─── CATEGORY ORDER ──────────────────────────────────────────────────────
+const CAT_ORDER = ['trending','foryou','all','global','sports','economy','entertainment','politics','science','tech'];
+
+function switchCatBy(delta) {
+  const idx = CAT_ORDER.indexOf(currentCat);
+  const next = CAT_ORDER[Math.max(0, Math.min(CAT_ORDER.length - 1, idx + delta))];
+  if (next === currentCat) {
+    // At boundary — snap card back
+    const card = document.querySelector('.card');
+    if (card) { card.style.transform = ''; card.style.opacity = ''; }
+    return;
+  }
+  navigator.vibrate?.(10);
+  document.querySelectorAll('#tabs .tab-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.cat === next);
+  });
+  const activePill = document.querySelector(`.tab-pill[data-cat="${next}"]`);
+  if (activePill) activePill.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  currentCat = next;
+  currentSub = 'all';
+  currentPage = 0;
+  loadingMore = false;
+
+  // Show/hide sports sub-tabs on swipe
+  const subWrap = document.getElementById('subTabsWrap');
+  if (currentCat === 'sports') {
+    subWrap.style.display = '';
+    document.querySelectorAll('.sub-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.sub-pill[data-sub="all"]').classList.add('active');
+  } else {
+    subWrap.style.display = 'none';
+  }
+
+  loadFeed(next);
+}
+
+// ─── PHYSICS GESTURES (Improved) ─────────────────────────────────────────
+let _mouseDown=false, _mouseStartX=0, _mouseStartY=0, _mouseCard=null, _mouseTime=0, _mouseAxis=null;
+let _onMove=null, _onUp=null;
+let _lastTap = 0;
+
+function setupGestures(card) {
+  let sY=0, sX=0, sTime=0, isDragging=false, axis=null;
+  let pullTriggered = false;
+
+  card.addEventListener('touchstart', e => {
+    sY = e.touches[0].clientY;
+    sX = e.touches[0].clientX;
+    sTime = Date.now();
+    isDragging = true;
+    axis = null;
+    pullTriggered = false;
+
+    card.classList.add('dragging');
+    card.style.transform = 'scale(1.01)';
+  }, {passive:true});
+
+  card.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    const y = e.touches[0].clientY;
+    const x = e.touches[0].clientX;
+    const dy = y - sY;
+    const dx = x - sX;
+
+    if (!axis) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) axis = 'x';
+      else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) axis = 'y';
+    }
+
+    // Prevent page from scrolling when we're swiping the card
+    if (axis) e.preventDefault();
+
+    if (axis === 'y') {
+      // Smoother resistance curve
+      const absD = Math.abs(dy);
+      const resist = Math.sign(dy) * (absD < 50 ? absD * 0.9 : 45 + (absD - 50) * 0.5);
+      card.style.transform = `translateY(${resist}px) scale(${1.01 - absD * 0.0001})`;
+
+      if(dy < -30) document.getElementById('hint-dn').classList.add('show');
+      else document.getElementById('hint-dn').classList.remove('show');
+
+      if(dy > 30) document.getElementById('hint-up').classList.add('show');
+      else document.getElementById('hint-up').classList.remove('show');
+
+      // Pull to refresh
+      if (currentIdx === 0 && dy > 60) {
+        document.getElementById('pullIndicator').classList.add('show');
+        document.getElementById('pullIndicator').style.transform = `translateX(-50%) translateY(${Math.min(dy - 60, 40)}px)`;
+        pullTriggered = true;
+      } else {
+        document.getElementById('pullIndicator').classList.remove('show');
+        pullTriggered = false;
+      }
+
+    } else if (axis === 'x') {
+      const absD = Math.abs(dx);
+      const resist = Math.sign(dx) * (absD < 50 ? absD * 0.9 : 45 + (absD - 50) * 0.4);
+      // 3D tilt effect
+      const tilt = -(dx / 12);
+      const clampedTilt = Math.max(-15, Math.min(15, tilt));
+      card.style.transform = `translateX(${resist}px) rotateY(${clampedTilt}deg) scale(1.01)`;
+      card.style.opacity = Math.max(0.5, 1 - absD/350);
+
+      if(dx < -20){
+        const nextCat=CAT_ORDER[Math.min(CAT_ORDER.length-1,CAT_ORDER.indexOf(currentCat)+1)];
+        document.getElementById('hint-right-label').textContent=nextCat;
+        document.getElementById('hint-right').classList.add('show');
+      } else if(dx > 20){
+        const prevCat=CAT_ORDER[Math.max(0,CAT_ORDER.indexOf(currentCat)-1)];
+        document.getElementById('hint-left-label').textContent=prevCat;
+        document.getElementById('hint-left').classList.add('show');
+      }
+    }
+  }, {passive:false});
+
+  card.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    isDragging = false;
+
+    card.classList.remove('dragging');
+    document.querySelectorAll('.swipe-hint').forEach(h => h.classList.remove('show'));
+
+    // Pull to refresh
+    if (pullTriggered && currentIdx === 0) {
+      const pi = document.getElementById('pullIndicator');
+      pi.classList.add('refreshing');
+      card.style.transform = '';
+      currentPage = 0;
+      loadFeed(currentCat).then(() => {
+        pi.classList.remove('show','refreshing');
+        pi.style.transform = '';
+      });
+      return;
+    }
+    document.getElementById('pullIndicator').classList.remove('show');
+    document.getElementById('pullIndicator').style.transform = '';
+
+    if (!axis) {
+      card.style.transform = '';
+      // Double tap: only on stationary taps (no drag)
+      const now = Date.now();
+      if (now - _lastTap < 250) {
+        const a = articles[currentIdx];
+        if (a) {
+          const likeBtn = card.querySelector('[data-action="like"]');
+          if (!liked.has(String(a.id))) toggleLike(String(a.id), likeBtn);
+          showHeartOverlay(card);
+        }
+        _lastTap = 0;
+      } else {
+        _lastTap = now;
+      }
+      return;
+    }
+    _lastTap = 0;
+
+    const y = e.changedTouches[0].clientY;
+    const x = e.changedTouches[0].clientX;
+    const dy = y - sY;
+    const dx = x - sX;
+    const dt = Date.now() - sTime;
+
+    const vY = dy / dt;
+    const vX = dx / dt;
+
+    if (axis === 'y') {
+      if (dy < -50 || vY < -0.4) goNext();
+      else if (dy > 50 || vY > 0.4) goPrev();
+      else card.style.transform = '';
+
+    } else if (axis === 'x') {
+      if (dx < -50 || vX < -0.4) switchCatBy(1);
+      else if (dx > 50 || vX > 0.4) switchCatBy(-1);
+      else {
+        card.style.transform = '';
+        card.style.opacity = '';
+      }
+    }
+  }, {passive:true});
+
+  if(_onMove) document.removeEventListener('mousemove', _onMove);
+  if(_onUp)   document.removeEventListener('mouseup',   _onUp);
+
+  card.addEventListener('mousedown', e => {
+    _mouseDown = true;
+    _mouseStartX = e.clientX;
+    _mouseStartY = e.clientY;
+    _mouseCard = card;
+    _mouseTime = Date.now();
+    _mouseAxis = null;
+    card.classList.add('dragging');
+    card.style.transform = 'scale(1.01)';
+  });
+
+  _onMove = e => {
+    if(!_mouseDown || _mouseCard !== card) return;
+    const dx = e.clientX - _mouseStartX;
+    const dy = e.clientY - _mouseStartY;
+
+    if (!_mouseAxis) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) _mouseAxis = 'x';
+      else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) _mouseAxis = 'y';
+    }
+
+    if (_mouseAxis === 'y') {
+      const absD = Math.abs(dy);
+      const resist = Math.sign(dy) * (absD < 50 ? absD * 0.9 : 45 + (absD - 50) * 0.5);
+      card.style.transform = `translateY(${resist}px) scale(${1.01 - absD * 0.0001})`;
+    } else if (_mouseAxis === 'x') {
+      const absD = Math.abs(dx);
+      const resist = Math.sign(dx) * (absD < 50 ? absD * 0.9 : 45 + (absD - 50) * 0.4);
+      const tilt = -(dx / 12);
+      const clampedTilt = Math.max(-15, Math.min(15, tilt));
+      card.style.transform = `translateX(${resist}px) rotateY(${clampedTilt}deg) scale(1.01)`;
+      card.style.opacity = Math.max(0.5, 1 - absD/350);
+    }
+  };
+
+  _onUp = e => {
+    if(!_mouseDown || _mouseCard !== card) return;
+    _mouseDown = false;
+    card.classList.remove('dragging');
+
+    if (!_mouseAxis) {
+      card.style.transform = '';
+      return;
+    }
+
+    const dx = e.clientX - _mouseStartX;
+    const dy = e.clientY - _mouseStartY;
+    const dt = Date.now() - _mouseTime;
+    const vY = dy / dt;
+    const vX = dx / dt;
+
+    if (_mouseAxis === 'y') {
+      if (dy < -50 || vY < -0.4) goNext();
+      else if (dy > 50 || vY > 0.4) goPrev();
+      else card.style.transform = '';
+    } else if (_mouseAxis === 'x') {
+      if (dx < -50 || vX < -0.4) switchCatBy(1);
+      else if (dx > 50 || vX > 0.4) switchCatBy(-1);
+      else {
+        card.style.transform = '';
+        card.style.opacity = '';
+      }
+    }
+  };
+  document.addEventListener('mousemove', _onMove);
+  document.addEventListener('mouseup',   _onUp);
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowDown'||e.key===' '){ e.preventDefault(); goNext(); }
+  if(e.key==='ArrowUp'){ e.preventDefault(); goPrev(); }
+});
+
+// ─── HEART OVERLAY (double tap) ───────────────────────────────────────────
+function showHeartOverlay(card) {
+  const overlay = document.createElement('div');
+  overlay.className = 'like-overlay';
+  overlay.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+  card.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 700);
+}
+
+// ─── LIKE with burst ──────────────────────────────────────────────────────
+function toggleLike(sid, btn) {
+  if (liked.has(sid)) {
+    liked.delete(sid);
+    delete likedArticles[sid];
+  } else {
+    liked.add(sid);
+    const a = articles.find(x => String(x.id) === sid);
+    if (a) {
+      likedArticles[sid] = { title:a.title, source:a.source, url:a.url, image_url:a.image_url, category:a.category };
+      trackPref(a.category, 3); // Likes = strong signal
+      navigator.vibrate?.(12);
+    }
+  }
+  localStorage.setItem('nf_liked', JSON.stringify([...liked]));
+  localStorage.setItem('nf_liked_articles', JSON.stringify(likedArticles));
+  if(!btn) return;
+  btn.classList.toggle('liked', liked.has(sid));
+  if(liked.has(sid)){
+    btn.style.transform='scale(1.4)';
+    setTimeout(()=>btn.style.transform='',200);
+    const burst = document.createElement('div');
+    burst.className = 'heart-burst';
+    [0, 45, 90, 135, 180, 225, 270, 315].forEach(a => {
+      const p = document.createElement('div');
+      const rad = a * Math.PI / 180;
+      const dist = 14 + Math.random() * 6;
+      p.style.cssText = `
+        position:absolute;width:4px;height:4px;background:#f87171;border-radius:50%;
+        left:50%;top:50%;
+        transform:translate(${Math.cos(rad)*dist}px,${Math.sin(rad)*dist}px) scale(0);
+        opacity:0; transition:all .35s cubic-bezier(.34,1.56,.64,1);
+      `;
+      burst.appendChild(p);
+      requestAnimationFrame(() => {
+        p.style.transform = `translate(${Math.cos(rad)*dist}px,${Math.sin(rad)*dist}px) scale(1)`;
+        p.style.opacity = '1';
+        setTimeout(() => { p.style.opacity = '0'; p.style.transform += ' scale(0)'; }, 150);
+      });
+    });
+    btn.appendChild(burst);
+    setTimeout(() => burst.remove(), 500);
+  }
+}
+
+// ─── SAVE / BOOKMARK ──────────────────────────────────────────────────────
+function toggleSave(sid, btn) {
+  if (saved.has(sid)) {
+    saved.delete(sid);
+    delete savedArticles[sid];
+  } else {
+    saved.add(sid);
+    const a = articles.find(x => String(x.id) === sid);
+    if (a) {
+      savedArticles[sid] = { title:a.title, source:a.source, url:a.url, image_url:a.image_url, category:a.category };
+      trackPref(a.category, 2); // Bookmarks = medium signal
+      navigator.vibrate?.(10);
+    }
+  }
+  localStorage.setItem('nf_saved', JSON.stringify([...saved]));
+  localStorage.setItem('nf_saved_articles', JSON.stringify(savedArticles));
+  if(!btn) return;
+  btn.classList.toggle('saved', saved.has(sid));
+  if (saved.has(sid)) {
+    btn.style.transform='scale(1.3)';
+    setTimeout(()=>btn.style.transform='',200);
+  }
+}
+
+function shareCard() {
+  const a=articles[currentIdx]; if(!a) return;
+  const appUrl = window.location.href.split('?')[0];
+  const shareUrl = `${appUrl}?story=${encodeURIComponent(a.url)}`;
+  const shareText = `${a.title} — Read on News Flip`;
+  if(navigator.share){ navigator.share({title:'News Flip',text:shareText,url:shareUrl}).catch(()=>{}); }
+  else { navigator.clipboard?.writeText(shareUrl).then(()=>alert('Link copied!')).catch(()=>{}); }
+}
+
+// ─── SEARCH ────────────────────────────────────────────────────────────────
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  document.getElementById('searchResults').innerHTML=`<div class="search-empty"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><div class="search-empty-text">Search your feed</div><div class="search-empty-sub">Type to find stories by title or source</div></div>`;
+  setTimeout(()=>document.getElementById('searchInput').focus(), 350);
+}
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  document.getElementById('searchInput').value='';
+}
+document.getElementById('searchCancel').onclick=closeSearch;
+
+let searchTimer = null;
+document.getElementById('searchInput').addEventListener('input', e => {
+  const q=e.target.value.trim();
+  const results=document.getElementById('searchResults');
+  if(!q){ results.innerHTML=`<div class="search-empty"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><div class="search-empty-text">Search your feed</div><div class="search-empty-sub">Search all stories by title, source, or category</div></div>`; return; }
+  if(q.length < 2) return;
+
+  // Debounce 300ms
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => {
+    results.innerHTML=`<div class="search-empty"><div class="search-empty-text" style="opacity:.5">Searching...</div></div>`;
+    try {
+      const searchUrl = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&or=(title.ilike.*${encodeURIComponent(q)}*,source.ilike.*${encodeURIComponent(q)}*,summary.ilike.*${encodeURIComponent(q)}*)&language=eq.${currentLang}&order=published_at.desc&limit=20`;
+      const res = await fetch(searchUrl, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+      });
+      const hits = await res.json();
+
+      if(!hits || !hits.length){ results.innerHTML=`<div class="search-empty"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><div class="search-empty-text">No results for "${q}"</div><div class="search-empty-sub">Try a different keyword</div></div>`; return; }
+      results.innerHTML=hits.map(a=>{
+        const cfg=CAT_CONFIG[a.category]||CAT_CONFIG.all;
+        return `<div class="search-result-item" onclick="closeSearch();setTimeout(()=>{const i=articles.findIndex(x=>x.id===${JSON.stringify(a.id)});if(i>-1){currentIdx=i;renderCard(articles[i]);}else{window.open('${a.url}','_blank');}},350)">
+          ${a.image_url?`<img class="search-result-img" src="${a.image_url}" alt="" onerror="this.style.display='none'">`:`<div class="search-result-img-placeholder" style="background:${cfg.bgDark}"></div>`}
+          <div class="search-result-body">
+            <div class="search-result-cat" style="color:${cfg.color}">${cfg.label}</div>
+            <div class="search-result-title">${a.title}</div>
+            <div class="search-result-source">${a.source} · ${relTime(a.published_at)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      results.innerHTML=`<div class="search-empty"><div class="search-empty-text">Search failed</div><div class="search-empty-sub">Check your connection</div></div>`;
+    }
+  }, 300);
+});
+
+// ─── PROFILE ──────────────────────────────────────────────────────────────
+function openProfile() {
+  renderProfileLists();
+  document.getElementById('profileOverlay').classList.add('open');
+}
+function closeProfile() {
+  document.getElementById('profileOverlay').classList.remove('open');
+}
+document.getElementById('profileClose').onclick = closeProfile;
+
+function renderProfileLists() {
+  // Just update counts on the profile page
+  const likedCount = liked.size;
+  const savedCount = saved.size;
+  document.getElementById('likedCount').textContent = likedCount ? `· ${likedCount}` : '';
+  document.getElementById('savedCount').textContent = savedCount ? `· ${savedCount}` : '';
+}
+
+// ─── COLLECTION PAGE (Liked / Bookmarked dedicated view) ─────────────────
+document.getElementById('collectionBack').onclick = closeCollectionPage;
+
+function openCollectionPage(type) {
+  const overlay = document.getElementById('collectionOverlay');
+  const title = document.getElementById('collectionTitle');
+  const body = document.getElementById('collectionBody');
+
+  if (type === 'liked') {
+    title.textContent = 'Liked stories';
+    renderCollectionItems(body, [...liked], likedArticles, 'removeLike');
+  } else {
+    title.textContent = 'Bookmarked stories';
+    renderCollectionItems(body, [...saved], savedArticles, 'removeBookmark');
+  }
+
+  overlay.dataset.type = type;
+  overlay.classList.add('open');
+}
+
+function closeCollectionPage() {
+  document.getElementById('collectionOverlay').classList.remove('open');
+}
+
+function renderCollectionItems(container, ids, store, removeFunc) {
+  if (!ids.length) {
+    const icon = removeFunc === 'removeLike'
+      ? '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+      : '<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    const label = removeFunc === 'removeLike' ? 'No liked stories yet' : 'No bookmarked stories yet';
+    container.innerHTML = `<div class="collection-empty">${icon}<div class="collection-empty-title">${label}</div><div class="collection-empty-sub">Stories you ${removeFunc === 'removeLike' ? 'like' : 'bookmark'} will appear here, grouped by category.</div></div>`;
+    return;
+  }
+
+  // Group by category
+  const groups = {};
+  ids.forEach(sid => {
+    const a = store[sid];
+    if (!a) return;
+    const cat = a.category || 'other';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push({ ...a, sid });
+  });
+
+  container.innerHTML = Object.keys(groups).map(cat => {
+    const cfg = CAT_CONFIG[cat] || CAT_CONFIG.all;
+    const items = groups[cat];
+    return `<div class="collection-group">
+      <div class="collection-group-header" style="color:${cfg.color}">${cfg.label} · ${items.length}</div>
+      ${items.map(a => `<div class="collection-item" onclick="window.open('${a.url}','_blank')">
+        ${a.image_url ? `<img class="collection-item-img" src="${a.image_url}" alt="" onerror="this.style.display='none'">` : `<div class="collection-item-img" style="background:${cfg.bgDark}"></div>`}
+        <div class="collection-item-body">
+          <div class="collection-item-title">${a.title}</div>
+          <div class="collection-item-meta">${a.source}</div>
+        </div>
+        <button class="collection-item-remove" onclick="event.stopPropagation();${removeFunc}('${a.sid}');refreshCollection()">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function refreshCollection() {
+  const overlay = document.getElementById('collectionOverlay');
+  const type = overlay.dataset.type;
+  const body = document.getElementById('collectionBody');
+  if (type === 'liked') {
+    renderCollectionItems(body, [...liked], likedArticles, 'removeLike');
+  } else {
+    renderCollectionItems(body, [...saved], savedArticles, 'removeBookmark');
+  }
+  renderProfileLists();
+}
+
+function removeLike(sid) {
+  liked.delete(sid);
+  delete likedArticles[sid];
+  localStorage.setItem('nf_liked', JSON.stringify([...liked]));
+  localStorage.setItem('nf_liked_articles', JSON.stringify(likedArticles));
+  // Update card button if visible
+  const btn = document.getElementById('like-'+sid);
+  if (btn) btn.classList.remove('liked');
+  renderProfileLists();
+}
+
+function removeBookmark(sid) {
+  saved.delete(sid);
+  delete savedArticles[sid];
+  localStorage.setItem('nf_saved', JSON.stringify([...saved]));
+  localStorage.setItem('nf_saved_articles', JSON.stringify(savedArticles));
+  // Update card button if visible
+  const btn = document.getElementById('save-'+sid);
+  if (btn) btn.classList.remove('saved');
+  renderProfileLists();
+}
+
+// Theme toggle
+document.getElementById('themeToggle').addEventListener('click', function() {
+  this.classList.toggle('on');
+  document.documentElement.classList.toggle('light');
+  localStorage.setItem('nf_theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+  // Re-render current card for gradient colors
+  if (articles[currentIdx]) renderCard(articles[currentIdx]);
+});
+
+// Font size
+document.querySelectorAll('.font-size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const scale = btn.dataset.scale;
+    document.documentElement.style.setProperty('--font-scale', scale);
+    // Shrink image when text is larger to prevent overflow
+    const imgFlex = scale === '1.15' ? '28%' : scale === '0.9' ? '42%' : '38%';
+    document.documentElement.style.setProperty('--img-flex', imgFlex);
+    localStorage.setItem('nf_font_scale', scale);
+    // Re-render current card to apply
+    if (articles[currentIdx]) renderCard(articles[currentIdx]);
+  });
+});
+
+// Language toggle
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = btn.dataset.lang;
+    localStorage.setItem('nf_lang', currentLang);
+    currentPage = 0;
+    loadingMore = false;
+    loadFeed(currentCat, 0, currentSub);
+  });
+});
+
+// Restore saved language on load
+(function() {
+  const savedLang = localStorage.getItem('nf_lang') || 'en';
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === savedLang);
+  });
+})();
+
+// Reset preferences
+document.getElementById('resetPrefsBtn').addEventListener('click', () => {
+  if (confirm('Reset your reading preferences? Your For You feed will start fresh.')) {
+    prefs = {};
+    localStorage.removeItem('nf_prefs');
+    alert('Preferences reset!');
+  }
+});
+
+// Clear all data
+document.getElementById('clearDataBtn').addEventListener('click', () => {
+  if (confirm('Clear all data? This removes likes, bookmarks, preferences, and settings. This cannot be undone.')) {
+    localStorage.removeItem('nf_liked');
+    localStorage.removeItem('nf_liked_articles');
+    localStorage.removeItem('nf_saved');
+    localStorage.removeItem('nf_saved_articles');
+    localStorage.removeItem('nf_prefs');
+    localStorage.removeItem('nf_theme');
+    localStorage.removeItem('nf_font_scale');
+    localStorage.removeItem('nf_onboarded');
+    liked = new Set();
+    likedArticles = {};
+    saved = new Set();
+    savedArticles = {};
+    prefs = {};
+    renderProfileLists();
+    alert('All data cleared!');
+    window.location.reload();
+  }
+});
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+document.getElementById('tabs').addEventListener('click', e => {
+  const pill=e.target.closest('.tab-pill'); if(!pill) return;
+  document.querySelectorAll('#tabs .tab-pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+  currentCat=pill.dataset.cat; currentPage=0; currentSub='all'; loadingMore=false;
+  
+  // Show/hide sports sub-tabs
+  const subWrap = document.getElementById('subTabsWrap');
+  if (currentCat === 'sports') {
+    subWrap.style.display = '';
+    document.querySelectorAll('.sub-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.sub-pill[data-sub="all"]').classList.add('active');
+  } else {
+    subWrap.style.display = 'none';
+  }
+  
+  loadFeed(currentCat);
+});
+
+// ─── SPORTS SUB-TABS ──────────────────────────────────────────────────────
+document.getElementById('subTabs').addEventListener('click', e => {
+  const pill = e.target.closest('.sub-pill'); if (!pill) return;
+  document.querySelectorAll('.sub-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  currentSub = pill.dataset.sub;
+  currentPage = 0; loadingMore = false;
+  loadFeed('sports', 0, currentSub);
+});
+
+// ─── BOTTOM BUTTONS ───────────────────────────────────────────────────────
+document.querySelectorAll('.bottom-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const nav=btn.dataset.nav;
+    // Close any open overlays first
+    closeSearch();
+    closeProfile();
+    if(nav==='search'){ openSearch(); return; }
+    if(nav==='profile'){ openProfile(); return; }
+    document.querySelectorAll('.bottom-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// ─── ONBOARD WITH INTEREST PICKER ─────────────────────────────────────────
+if (localStorage.getItem('nf_onboarded')) {
+  document.getElementById('onboard').classList.add('hidden');
+}
+
+// Interest chip toggle
+document.querySelectorAll('.interest-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('selected'));
+});
+
+document.getElementById('dismissBtn').addEventListener('click', ()=>{
+  // Save selected interests as initial preferences
+  const selected = [...document.querySelectorAll('.interest-chip.selected')];
+  selected.forEach(chip => {
+    const interest = chip.dataset.interest;
+    prefs[interest] = (prefs[interest] || 0) + 10; // Strong initial signal
+  });
+  if (selected.length) localStorage.setItem('nf_prefs', JSON.stringify(prefs));
+  
+  document.getElementById('onboard').classList.add('hidden');
+  localStorage.setItem('nf_onboarded', '1');
+});
+
+// ─── SPLASH SCREEN ───────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+  }, 800);
+});
+
+// ─── SERVICE WORKER ──────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ─── BOOT ──────────────────────────────────────────────────────────────────
+const _storyParam = new URLSearchParams(window.location.search).get('story');
+if (_storyParam) {
+  // Deep link: fetch the specific story by URL and show it
+  (async () => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/articles?select=*&url=eq.${encodeURIComponent(_storyParam)}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        signal: AbortSignal.timeout(5000)
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data && data.length) {
+        const a = data[0];
+        articles = [{ id:a.id||a.url, category:a.category, title:a.title, summary:a.summary, full:a.full_text||'', source:a.source, time:relTime(a.published_at), url:a.url, image_url:a.image_url||null }];
+        currentIdx = 0;
+        renderCard(articles[0]);
+        // Also load the rest of the feed in the background
+        loadFeed('trending');
+        return;
+      }
+    } catch {}
+    loadFeed('trending');
+  })();
+} else {
+  loadFeed('trending');
+}
+</script>
+</body>
+</html>
