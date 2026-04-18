@@ -553,6 +553,119 @@ body {
 .search-result-title { font-family:var(--serif); font-size:14px; font-weight:700; line-height:1.35; color:var(--text); margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .search-result-source { font-size:11px; color:var(--muted); }
 
+/* ── Home dashboard ── */
+.home-screen {
+  position:absolute; inset:0; background:var(--bg); z-index:80;
+  display:flex; flex-direction:column;
+}
+.home-screen.hidden { display:none; }
+.home-scroll {
+  flex:1; overflow-y:auto; padding:20px 16px 100px;
+  -webkit-overflow-scrolling:touch;
+}
+.home-greeting {
+  margin-bottom:20px; padding:0 4px;
+}
+.home-greeting-text {
+  font-family:var(--serif); font-size:26px; font-weight:700;
+  color:var(--text); margin-bottom:2px;
+}
+.home-date {
+  font-size:13px; color:var(--muted); font-weight:500;
+}
+.home-card {
+  background:var(--surface); border-radius:16px;
+  padding:16px; margin-bottom:12px;
+  border:1px solid var(--border);
+}
+.home-card-header {
+  display:flex; align-items:center; gap:8px;
+  font-size:13px; font-weight:600; color:var(--dim);
+  margin-bottom:14px; text-transform:uppercase; letter-spacing:.5px;
+}
+
+/* Weather */
+.home-weather-body {
+  display:flex; align-items:center; justify-content:space-between;
+}
+.weather-main {
+  display:flex; align-items:center; gap:12px;
+}
+.weather-temp {
+  font-family:var(--serif); font-size:42px; font-weight:700; color:var(--text);
+  line-height:1;
+}
+.weather-details {
+  display:flex; flex-direction:column; gap:2px;
+}
+.weather-condition {
+  font-size:14px; font-weight:600; color:var(--text);
+}
+.weather-extra {
+  font-size:12px; color:var(--muted);
+}
+.weather-icon {
+  font-size:40px; line-height:1;
+}
+
+/* Markets */
+.home-markets-body {
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.market-item {
+  flex:1; min-width:calc(33% - 6px);
+  background:var(--card-bg); border-radius:12px;
+  padding:12px; border:1px solid var(--border);
+}
+.market-symbol {
+  font-size:11px; font-weight:700; color:var(--dim);
+  text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;
+}
+.market-price {
+  font-family:var(--serif); font-size:17px; font-weight:700; color:var(--text);
+  margin-bottom:4px;
+}
+.market-change {
+  font-size:11px; font-weight:600; border-radius:6px;
+  padding:2px 6px; display:inline-block;
+}
+.market-change.up { color:#34d399; background:rgba(52,211,153,.1); }
+.market-change.down { color:#f43f5e; background:rgba(244,63,94,.1); }
+
+/* Crypto */
+.home-crypto-body {
+  display:flex; gap:8px;
+}
+.crypto-item {
+  flex:1;
+  background:var(--card-bg); border-radius:12px;
+  padding:12px; border:1px solid var(--border);
+}
+
+/* Headlines */
+.home-headlines {
+  display:flex; flex-direction:column; gap:0;
+}
+.headline-item {
+  display:flex; gap:12px; padding:12px 0;
+  border-bottom:1px solid var(--border);
+  cursor:pointer; align-items:center;
+}
+.headline-item:last-child { border-bottom:none; }
+.headline-item-img {
+  width:56px; height:56px; border-radius:10px;
+  object-fit:cover; flex-shrink:0; background:var(--card-bg);
+}
+.headline-item-body { flex:1; min-width:0; }
+.headline-item-title {
+  font-family:var(--serif); font-size:14px; font-weight:600;
+  line-height:1.35; color:var(--text); margin-bottom:4px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.headline-item-meta {
+  font-size:11px; color:var(--muted);
+}
+
 /* ── Collection page (Liked / Bookmarked) ── */
 .collection-overlay {
   position:absolute; inset:0; background:var(--bg); z-index:95;
@@ -725,7 +838,7 @@ body {
 </div>
 
 <div class="app-container" id="app" role="main" aria-label="News Flip app">
-  <div class="tabs-scroll" role="tablist" aria-label="News categories">
+  <div class="tabs-scroll" role="tablist" aria-label="News categories" style="display:none">
     <div class="tabs" id="tabs">
       <div class="tab-pill active" data-cat="trending"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> Trending</div>
       <div class="tab-pill" data-cat="foryou"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> For You</div>
@@ -752,7 +865,7 @@ body {
     </div>
   </div>
 
-  <div class="feed-outer" role="region" aria-label="News feed" aria-live="polite">
+  <div class="feed-outer" role="region" aria-label="News feed" aria-live="polite" style="display:none">>
     <div class="pull-indicator" id="pullIndicator">
       <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/><polyline points="21 3 21 9 15 9"/></svg>
     </div>
@@ -765,9 +878,64 @@ body {
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
   </div>
 
+  <!-- Home Dashboard -->
+  <div class="home-screen" id="homeScreen">
+    <div class="home-scroll">
+      <!-- Greeting -->
+      <div class="home-greeting">
+        <div class="home-greeting-text" id="homeGreeting">Good morning</div>
+        <div class="home-date" id="homeDate"></div>
+      </div>
+
+      <!-- Weather -->
+      <div class="home-card" id="weatherCard">
+        <div class="home-card-header">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--amber);stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Weather</span>
+        </div>
+        <div class="home-weather-body" id="weatherBody">
+          <div style="color:var(--muted);font-size:13px">Loading weather...</div>
+        </div>
+      </div>
+
+      <!-- Markets -->
+      <div class="home-card" id="marketsCard">
+        <div class="home-card-header">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+          <span>Markets</span>
+        </div>
+        <div class="home-markets-body" id="marketsBody">
+          <div style="color:var(--muted);font-size:13px">Loading markets...</div>
+        </div>
+      </div>
+
+      <!-- Crypto -->
+      <div class="home-card" id="cryptoCard">
+        <div class="home-card-header">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--amber);stroke-width:2;stroke-linecap:round"><path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-6.083-1.072m6.083 1.072.347-1.971M7.116 16.153l-2.04-5.95m0 0 1.563-8.864m0 0L11.593 2.38"/></svg>
+          <span>Crypto</span>
+        </div>
+        <div class="home-crypto-body" id="cryptoBody">
+          <div style="color:var(--muted);font-size:13px">Loading crypto...</div>
+        </div>
+      </div>
+
+      <!-- Top Headlines -->
+      <div class="home-card">
+        <div class="home-card-header">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <span>Top stories</span>
+        </div>
+        <div class="home-headlines" id="homeHeadlines">
+          <div style="color:var(--muted);font-size:13px">Loading headlines...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <nav class="bottom-bar" role="navigation" aria-label="Main navigation">
-    <button class="bottom-btn active" data-nav="feed" aria-label="Home feed"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
-    <button class="bottom-btn" data-nav="search" aria-label="Search stories"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+    <button class="bottom-btn active" data-nav="home" aria-label="Home dashboard"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+    <button class="bottom-btn" data-nav="feed" aria-label="News cards"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></button>
     <button class="bottom-btn" data-nav="profile" aria-label="Profile and settings"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
   </nav>
 
@@ -1945,16 +2113,39 @@ document.getElementById('subTabs').addEventListener('click', e => {
 });
 
 // ─── BOTTOM BUTTONS ───────────────────────────────────────────────────────
+function showView(view) {
+  const homeScreen = document.getElementById('homeScreen');
+  const tabsScroll = document.querySelector('.tabs-scroll');
+  const subTabsWrap = document.getElementById('subTabsWrap');
+  const feedOuter = document.querySelector('.feed-outer');
+
+  if (view === 'home') {
+    homeScreen.classList.remove('hidden');
+    tabsScroll.style.display = 'none';
+    subTabsWrap.style.display = 'none';
+    feedOuter.style.display = 'none';
+    closeProfile();
+    closeCollectionPage();
+    loadHomeDashboard();
+  } else if (view === 'feed') {
+    homeScreen.classList.add('hidden');
+    tabsScroll.style.display = '';
+    feedOuter.style.display = '';
+    // Restore sub-tabs if sports is active
+    if (currentCat === 'sports') subTabsWrap.style.display = '';
+    closeProfile();
+    closeCollectionPage();
+  } else if (view === 'profile') {
+    openProfile();
+  }
+}
+
 document.querySelectorAll('.bottom-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const nav=btn.dataset.nav;
-    // Close any open overlays first
-    closeSearch();
-    closeProfile();
-    if(nav==='search'){ openSearch(); return; }
-    if(nav==='profile'){ openProfile(); return; }
     document.querySelectorAll('.bottom-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
+    showView(nav);
   });
 });
 
@@ -1992,6 +2183,152 @@ window.addEventListener('load', () => {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+// ─── HOME DASHBOARD ──────────────────────────────────────────────────────
+function loadHomeDashboard() {
+  // Greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('homeGreeting').textContent = greeting;
+  
+  const opts = { weekday:'long', month:'long', day:'numeric' };
+  document.getElementById('homeDate').textContent = new Date().toLocaleDateString('en-US', opts);
+
+  loadWeather();
+  loadMarkets();
+  loadCrypto();
+  loadTopHeadlines();
+}
+
+async function loadWeather() {
+  try {
+    // Get user location
+    const geo = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {timeout:5000});
+    });
+    const {latitude: lat, longitude: lon} = geo.coords;
+    
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&timezone=auto`);
+    const data = await res.json();
+    const c = data.current;
+    
+    const weatherCodes = {
+      0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',
+      45:'Foggy',48:'Fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+      61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',
+      80:'Light showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm'
+    };
+    const weatherIcons = {
+      0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌧',55:'🌧',
+      61:'🌧',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈'
+    };
+    
+    document.getElementById('weatherBody').innerHTML = `
+      <div class="weather-main">
+        <div class="weather-temp">${Math.round(c.temperature_2m)}°</div>
+        <div class="weather-details">
+          <div class="weather-condition">${weatherCodes[c.weather_code] || 'Unknown'}</div>
+          <div class="weather-extra">Humidity ${c.relative_humidity_2m}% · Wind ${Math.round(c.wind_speed_10m)} mph</div>
+        </div>
+      </div>
+      <div class="weather-icon">${weatherIcons[c.weather_code] || '🌤'}</div>`;
+  } catch(e) {
+    document.getElementById('weatherBody').innerHTML = `
+      <div style="color:var(--muted);font-size:13px">Enable location to see weather</div>`;
+  }
+}
+
+async function loadMarkets() {
+  try {
+    const symbols = ['SPY','DIA','QQQ'];
+    const labels = {SPY:'S&P 500', DIA:'Dow Jones', QQQ:'Nasdaq'};
+    
+    const res = await fetch('https://query1.finance.yahoo.com/v7/finance/quote?symbols=SPY,DIA,QQQ', {
+      headers: {'User-Agent':'Mozilla/5.0'}
+    });
+    
+    if (!res.ok) throw new Error('Markets API failed');
+    const data = await res.json();
+    const quotes = data.quoteResponse?.result || [];
+    
+    document.getElementById('marketsBody').innerHTML = quotes.map(q => {
+      const change = q.regularMarketChangePercent || 0;
+      const isUp = change >= 0;
+      return `<div class="market-item">
+        <div class="market-symbol">${labels[q.symbol] || q.symbol}</div>
+        <div class="market-price">$${q.regularMarketPrice?.toFixed(2) || '—'}</div>
+        <div class="market-change ${isUp?'up':'down'}">${isUp?'+':''}${change.toFixed(2)}%</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    // Fallback — show placeholder
+    document.getElementById('marketsBody').innerHTML = ['S&P 500','Dow Jones','Nasdaq'].map(name =>
+      `<div class="market-item">
+        <div class="market-symbol">${name}</div>
+        <div class="market-price" style="color:var(--muted)">—</div>
+        <div class="market-change" style="color:var(--muted)">Unavailable</div>
+      </div>`
+    ).join('');
+  }
+}
+
+async function loadCrypto() {
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');
+    const data = await res.json();
+    
+    const coins = [
+      {id:'bitcoin', name:'BTC', icon:'₿'},
+      {id:'ethereum', name:'ETH', icon:'Ξ'},
+      {id:'solana', name:'SOL', icon:'◎'},
+    ];
+    
+    document.getElementById('cryptoBody').innerHTML = coins.map(coin => {
+      const price = data[coin.id]?.usd || 0;
+      const change = data[coin.id]?.usd_24h_change || 0;
+      const isUp = change >= 0;
+      const formatted = price >= 1000 ? `$${(price/1000).toFixed(1)}K` : `$${price.toFixed(2)}`;
+      return `<div class="crypto-item">
+        <div class="market-symbol">${coin.name}</div>
+        <div class="market-price">${formatted}</div>
+        <div class="market-change ${isUp?'up':'down'}">${isUp?'+':''}${change.toFixed(2)}%</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('cryptoBody').innerHTML = `<div style="color:var(--muted);font-size:13px">Unable to load crypto data</div>`;
+  }
+}
+
+async function loadTopHeadlines() {
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&is_trending=eq.true&language=eq.${currentLang}&order=published_at.desc&limit=5`;
+    const res = await fetch(url, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    const headlines = await res.json();
+    
+    if (!headlines || !headlines.length) {
+      document.getElementById('homeHeadlines').innerHTML = `<div style="color:var(--muted);font-size:13px">No trending stories right now</div>`;
+      return;
+    }
+    
+    document.getElementById('homeHeadlines').innerHTML = headlines.map(a => {
+      const cfg = CAT_CONFIG[a.category] || CAT_CONFIG.all;
+      return `<div class="headline-item" onclick="showView('feed');setTimeout(()=>{const i=articles.findIndex(x=>x.id===${JSON.stringify(a.id)});if(i>-1){currentIdx=i;renderCard(articles[i]);}},300)">
+        ${a.image_url ? `<img class="headline-item-img" src="${a.image_url}" alt="" onerror="this.style.display='none'">` : `<div class="headline-item-img" style="background:${cfg.bgDark}"></div>`}
+        <div class="headline-item-body">
+          <div class="headline-item-title">${a.title}</div>
+          <div class="headline-item-meta">${a.source} · ${relTime(a.published_at)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('homeHeadlines').innerHTML = `<div style="color:var(--muted);font-size:13px">Unable to load headlines</div>`;
+  }
+}
+
+// Load home on first boot
+loadHomeDashboard();
 
 // ─── BOOT ──────────────────────────────────────────────────────────────────
 const _storyParam = new URLSearchParams(window.location.search).get('story');
