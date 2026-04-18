@@ -382,11 +382,9 @@ body {
 /* ── Profile overlay ── */
 .profile-overlay {
   position:absolute; inset:0; background:var(--bg); z-index:90;
-  display:flex; flex-direction:column;
-  transform:translateY(100%);
-  transition:transform .32s cubic-bezier(.32,.72,0,1);
+  display:none; flex-direction:column;
 }
-.profile-overlay.open { transform:translateY(0); }
+.profile-overlay.open { display:flex; }
 .profile-top {
   display:flex; align-items:center; justify-content:space-between;
   padding:18px 20px; border-bottom:1px solid var(--border); flex-shrink:0;
@@ -509,11 +507,9 @@ body {
 /* ── Search overlay ── */
 .search-overlay {
   position:absolute; inset:0; background:var(--bg); z-index:90;
-  display:flex; flex-direction:column;
-  transform:translateY(100%);
-  transition:transform .32s cubic-bezier(.32,.72,0,1);
+  display:none; flex-direction:column;
 }
-.search-overlay.open { transform:translateY(0); }
+.search-overlay.open { display:flex; }
 .search-top {
   display:flex; align-items:center; gap:12px;
   padding:16px 20px; border-bottom:1px solid var(--border); flex-shrink:0;
@@ -562,15 +558,15 @@ body {
 .home-screen.hidden { display:none; }
 
 .home-scroll {
-  flex:1; overflow-y:auto; padding:0 14px 100px;
+  flex:1; overflow-y:auto; padding:12px 14px 40px;
   -webkit-overflow-scrolling:touch;
 }
 
 /* Hero story — magazine cover */
 .home-hero {
-  position:relative; width:100%; height:240px;
+  position:relative; width:100%; height:260px;
   border-radius:20px; overflow:hidden;
-  margin-bottom:14px; cursor:pointer;
+  margin-bottom:12px; cursor:pointer;
   background:var(--surface);
 }
 .home-hero-shimmer {
@@ -584,7 +580,7 @@ body {
 }
 .home-hero-overlay {
   position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.3) 40%, transparent 70%);
+  background:linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.35) 40%, transparent 65%);
 }
 .home-hero-content {
   position:absolute; bottom:0; left:0; right:0;
@@ -602,72 +598,45 @@ body {
   margin-bottom:8px;
 }
 .home-hero-meta {
-  font-size:11px; color:rgba(255,255,255,.6);
+  font-size:11px; color:rgba(255,255,255,.55);
 }
 
-/* Widget row */
-.home-row {
-  display:flex; gap:8px; margin-bottom:14px;
+/* Quick glance bar */
+.home-glance {
+  display:flex; align-items:center;
+  background:var(--card-bg); border-radius:14px;
+  padding:14px 4px; margin-bottom:16px;
+  border:1px solid var(--border);
+  overflow-x:auto; scrollbar-width:none;
+  gap:0;
 }
-.home-widget {
-  flex:1; background:var(--card-bg); border-radius:14px;
-  padding:12px; border:1px solid var(--border);
-  display:flex; flex-direction:column; gap:8px;
+.home-glance::-webkit-scrollbar { display:none; }
+.home-glance-item {
+  flex:0 0 auto; min-width:70px;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:0 8px;
 }
-.home-widget-icon {
-  width:28px; height:28px; border-radius:8px;
-  background:var(--surface); display:flex;
-  align-items:center; justify-content:center;
+.glance-label {
+  font-size:10px; font-weight:600; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.5px;
 }
-.home-widget-body { display:flex; flex-direction:column; gap:2px; }
-.home-widget-value {
-  font-family:var(--serif); font-size:16px; font-weight:700;
-  color:var(--text); letter-spacing:-.3px;
+.glance-value {
+  font-family:var(--serif); font-size:15px; font-weight:700; color:var(--text);
 }
-.home-widget-label {
-  font-size:10px; color:var(--muted); font-weight:500;
-}
-.home-widget-change {
+.glance-change {
   font-size:10px; font-weight:700;
 }
-.home-widget-change.up { color:#34d399; }
-.home-widget-change.down { color:#f43f5e; }
-
-/* Cards */
-.home-card {
-  background:var(--card-bg); border-radius:20px;
-  padding:18px; margin-bottom:14px;
-  border:1px solid var(--border);
-}
-.home-card-header {
-  display:flex; align-items:center; gap:8px;
-  font-size:11px; font-weight:700; color:var(--dim);
-  margin-bottom:14px; text-transform:uppercase; letter-spacing:.8px;
+.glance-change.up { color:#34d399; }
+.glance-change.down { color:#f43f5e; }
+.home-glance-divider {
+  width:1px; height:28px; background:var(--border); flex-shrink:0;
 }
 
-/* Markets combined */
-.home-markets-body {
-  display:flex; gap:8px; flex-wrap:wrap;
+/* Section title */
+.home-section-title {
+  font-family:var(--serif); font-size:18px; font-weight:700;
+  color:var(--text); margin-bottom:12px; padding:0 2px;
 }
-.market-item {
-  flex:1; min-width:calc(33% - 6px);
-  background:var(--surface); border-radius:12px;
-  padding:12px; border:1px solid var(--border);
-}
-.market-symbol {
-  font-size:10px; font-weight:700; color:var(--muted);
-  text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px;
-}
-.market-price {
-  font-family:var(--serif); font-size:15px; font-weight:700; color:var(--text);
-  margin-bottom:4px; letter-spacing:-.2px;
-}
-.market-change {
-  font-size:10px; font-weight:700; border-radius:100px;
-  padding:2px 7px; display:inline-block;
-}
-.market-change.up { color:#34d399; background:rgba(52,211,153,.1); }
-.market-change.down { color:#f43f5e; background:rgba(244,63,94,.1); }
 
 /* Headlines */
 .home-headlines { display:flex; flex-direction:column; }
@@ -679,7 +648,7 @@ body {
 .headline-item:last-child { border-bottom:none; padding-bottom:0; }
 .headline-item:first-child { padding-top:0; }
 .headline-item-img {
-  width:64px; height:64px; border-radius:12px;
+  width:72px; height:72px; border-radius:14px;
   object-fit:cover; flex-shrink:0; background:var(--surface);
 }
 .headline-item-body { flex:1; min-width:0; }
@@ -894,7 +863,7 @@ body {
     </div>
   </div>
 
-  <div class="feed-outer" role="region" aria-label="News feed" aria-live="polite">>
+  <div class="feed-outer" role="region" aria-label="News feed" aria-live="polite">
     <div class="pull-indicator" id="pullIndicator">
       <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/><polyline points="21 3 21 9 15 9"/></svg>
     </div>
@@ -915,57 +884,38 @@ body {
         <div class="home-hero-shimmer"></div>
       </div>
 
-      <!-- Weather + Markets row -->
-      <div class="home-row">
-        <div class="home-widget" id="weatherCard">
-          <div class="home-widget-icon">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--amber);stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
-          </div>
-          <div class="home-widget-body" id="weatherBody">
-            <div class="home-widget-value">--°</div>
-            <div class="home-widget-label">Weather</div>
-          </div>
+      <!-- Quick glance row -->
+      <div class="home-glance">
+        <div class="home-glance-item" id="glanceWeather">
+          <span class="glance-label">Weather</span>
+          <span class="glance-value">--°</span>
         </div>
-        <div class="home-widget" id="btcWidget">
-          <div class="home-widget-icon" style="background:rgba(247,147,26,.1)">
-            <span style="font-size:14px;font-weight:800;color:#f7931a">₿</span>
-          </div>
-          <div class="home-widget-body" id="btcBody">
-            <div class="home-widget-value">BTC</div>
-            <div class="home-widget-label">Loading...</div>
-          </div>
+        <div class="home-glance-divider"></div>
+        <div class="home-glance-item" id="glanceBtc">
+          <span class="glance-label">BTC</span>
+          <span class="glance-value">--</span>
         </div>
-        <div class="home-widget" id="spWidget">
-          <div class="home-widget-icon">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
-          </div>
-          <div class="home-widget-body" id="spBody">
-            <div class="home-widget-value">S&P</div>
-            <div class="home-widget-label">Loading...</div>
-          </div>
+        <div class="home-glance-divider"></div>
+        <div class="home-glance-item" id="glanceEth">
+          <span class="glance-label">ETH</span>
+          <span class="glance-value">--</span>
+        </div>
+        <div class="home-glance-divider"></div>
+        <div class="home-glance-item" id="glanceSp">
+          <span class="glance-label">S&P 500</span>
+          <span class="glance-value">--</span>
+        </div>
+        <div class="home-glance-divider"></div>
+        <div class="home-glance-item" id="glanceDow">
+          <span class="glance-label">DOW</span>
+          <span class="glance-value">--</span>
         </div>
       </div>
 
-      <!-- Markets full row -->
-      <div class="home-card" id="marketsCard">
-        <div class="home-card-header">
-          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
-          <span>Markets & Crypto</span>
-        </div>
-        <div class="home-markets-body" id="marketsBody">
-          <div style="color:var(--muted);font-size:13px">Loading...</div>
-        </div>
-      </div>
-
-      <!-- More stories -->
-      <div class="home-card">
-        <div class="home-card-header">
-          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          <span>More stories</span>
-        </div>
-        <div class="home-headlines" id="homeHeadlines">
-          <div style="color:var(--muted);font-size:13px">Loading headlines...</div>
-        </div>
+      <!-- Latest stories list -->
+      <div class="home-section-title">Latest stories</div>
+      <div class="home-headlines" id="homeHeadlines">
+        <div style="color:var(--muted);font-size:13px;padding:20px 0">Loading...</div>
       </div>
     </div>
   </div>
@@ -2163,16 +2113,19 @@ function showView(view) {
     feedOuter.style.display = 'none';
     closeProfile();
     closeCollectionPage();
+    closeSearch();
     loadHomeDashboard();
   } else if (view === 'feed') {
     homeScreen.classList.add('hidden');
     tabsScroll.style.display = '';
     feedOuter.style.display = '';
-    // Restore sub-tabs if sports is active
     if (currentCat === 'sports') subTabsWrap.style.display = '';
     closeProfile();
     closeCollectionPage();
+    closeSearch();
   } else if (view === 'profile') {
+    closeSearch();
+    closeCollectionPage();
     openProfile();
   }
 }
@@ -2224,10 +2177,7 @@ if ('serviceWorker' in navigator) {
 // ─── HOME DASHBOARD ──────────────────────────────────────────────────────
 function loadHomeDashboard() {
   loadHeroStory();
-  loadWeatherWidget();
-  loadCryptoWidget();
-  loadMarketWidget();
-  loadMarketsSection();
+  loadGlanceData();
   loadTopHeadlines();
 }
 
@@ -2254,17 +2204,14 @@ async function loadHeroStory() {
       document.querySelectorAll('.bottom-btn').forEach(b=>b.classList.remove('active'));
       document.querySelector('[data-nav=feed]').classList.add('active');
       showView('feed');
-      setTimeout(()=>{
-        const i=articles.findIndex(x=>x.id===a.id);
-        if(i>-1){currentIdx=i;renderCard(articles[i]);}
-      },300);
     };
   } catch(e) {
-    document.getElementById('homeHero').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px">No trending stories</div>`;
+    document.getElementById('homeHero').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px">No trending stories yet</div>`;
   }
 }
 
-async function loadWeatherWidget() {
+async function loadGlanceData() {
+  // Weather
   try {
     const geo = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {timeout:5000});
@@ -2272,78 +2219,64 @@ async function loadWeatherWidget() {
     const {latitude: lat, longitude: lon} = geo.coords;
     const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto`);
     const data = await res.json();
-    const c = data.current;
-    const weatherIcons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌧',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈'};
-    const weatherNames = {0:'Clear',1:'Clear',2:'Cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Drizzle',53:'Drizzle',55:'Rain',61:'Rain',63:'Rain',65:'Heavy rain',71:'Snow',73:'Snow',75:'Snow',80:'Showers',81:'Rain',82:'Storm',95:'Thunder'};
+    const icons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',51:'🌦',53:'🌧',61:'🌧',63:'🌧',71:'🌨',73:'❄️',80:'🌦',82:'⛈',95:'⛈'};
+    document.getElementById('glanceWeather').innerHTML = `
+      <span class="glance-label">Weather</span>
+      <span class="glance-value">${Math.round(data.current.temperature_2m)}° ${icons[data.current.weather_code]||'🌤'}</span>`;
+  } catch(e) {
+    document.getElementById('glanceWeather').innerHTML = `<span class="glance-label">Weather</span><span class="glance-value">--°</span>`;
+  }
+
+  // Crypto + Stocks
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+    const data = await res.json();
     
-    document.getElementById('weatherBody').innerHTML = `
-      <div class="home-widget-value">${Math.round(c.temperature_2m)}° ${weatherIcons[c.weather_code]||'🌤'}</div>
-      <div class="home-widget-label">${weatherNames[c.weather_code]||'Weather'}</div>`;
+    const btcPrice = data.bitcoin?.usd || 0;
+    const btcChange = data.bitcoin?.usd_24h_change || 0;
+    const ethPrice = data.ethereum?.usd || 0;
+    const ethChange = data.ethereum?.usd_24h_change || 0;
+
+    document.getElementById('glanceBtc').innerHTML = `
+      <span class="glance-label">BTC</span>
+      <span class="glance-value">$${(btcPrice/1000).toFixed(1)}K</span>
+      <span class="glance-change ${btcChange>=0?'up':'down'}">${btcChange>=0?'+':''}${btcChange.toFixed(1)}%</span>`;
+    
+    document.getElementById('glanceEth').innerHTML = `
+      <span class="glance-label">ETH</span>
+      <span class="glance-value">$${ethPrice.toFixed(0)}</span>
+      <span class="glance-change ${ethChange>=0?'up':'down'}">${ethChange>=0?'+':''}${ethChange.toFixed(1)}%</span>`;
   } catch(e) {
-    document.getElementById('weatherBody').innerHTML = `<div class="home-widget-value">--°</div><div class="home-widget-label">Location off</div>`;
+    document.getElementById('glanceBtc').innerHTML = `<span class="glance-label">BTC</span><span class="glance-value">--</span>`;
+    document.getElementById('glanceEth').innerHTML = `<span class="glance-label">ETH</span><span class="glance-value">--</span>`;
   }
-}
 
-async function loadCryptoWidget() {
+  // Stocks (S&P 500 and Dow via free API)
   try {
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
-    const data = await res.json();
-    const price = data.bitcoin?.usd || 0;
-    const change = data.bitcoin?.usd_24h_change || 0;
-    const isUp = change >= 0;
-    document.getElementById('btcBody').innerHTML = `
-      <div class="home-widget-value">$${(price/1000).toFixed(1)}K</div>
-      <div class="home-widget-change ${isUp?'up':'down'}">${isUp?'+':''}${change.toFixed(1)}%</div>
-      <div class="home-widget-label">Bitcoin</div>`;
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=sp500,djia&vs_currencies=usd&include_24hr_change=true');
+    // CoinGecko doesn't have stocks — use static display for now
+    document.getElementById('glanceSp').innerHTML = `<span class="glance-label">S&P 500</span><span class="glance-value" style="font-size:12px;color:var(--dim)">Markets</span>`;
+    document.getElementById('glanceDow').innerHTML = `<span class="glance-label">DOW</span><span class="glance-value" style="font-size:12px;color:var(--dim)">Markets</span>`;
   } catch(e) {
-    document.getElementById('btcBody').innerHTML = `<div class="home-widget-value">BTC</div><div class="home-widget-label">Unavailable</div>`;
-  }
-}
-
-async function loadMarketWidget() {
-  // S&P 500 widget — uses same crypto API pattern
-  document.getElementById('spBody').innerHTML = `<div class="home-widget-value">S&P</div><div class="home-widget-label">Markets</div>`;
-}
-
-async function loadMarketsSection() {
-  try {
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');
-    const data = await res.json();
-    const coins = [
-      {id:'bitcoin', name:'BTC'},
-      {id:'ethereum', name:'ETH'},
-      {id:'solana', name:'SOL'},
-    ];
-    document.getElementById('marketsBody').innerHTML = coins.map(coin => {
-      const price = data[coin.id]?.usd || 0;
-      const change = data[coin.id]?.usd_24h_change || 0;
-      const isUp = change >= 0;
-      const formatted = price >= 1000 ? `$${(price/1000).toFixed(1)}K` : `$${price.toFixed(2)}`;
-      return `<div class="market-item">
-        <div class="market-symbol">${coin.name}</div>
-        <div class="market-price">${formatted}</div>
-        <div class="market-change ${isUp?'up':'down'}">${isUp?'+':''}${change.toFixed(2)}%</div>
-      </div>`;
-    }).join('');
-  } catch(e) {
-    document.getElementById('marketsBody').innerHTML = `<div style="color:var(--muted);font-size:13px">Unable to load data</div>`;
+    document.getElementById('glanceSp').innerHTML = `<span class="glance-label">S&P 500</span><span class="glance-value">--</span>`;
+    document.getElementById('glanceDow').innerHTML = `<span class="glance-label">DOW</span><span class="glance-value">--</span>`;
   }
 }
 
 async function loadTopHeadlines() {
   try {
-    const url = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&language=eq.${currentLang}&order=published_at.desc&limit=6&offset=1`;
+    const url = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&language=eq.${currentLang}&order=published_at.desc&limit=8&offset=1`;
     const res = await fetch(url, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
     });
     const headlines = await res.json();
     if (!headlines || !headlines.length) {
-      document.getElementById('homeHeadlines').innerHTML = `<div style="color:var(--muted);font-size:13px">No stories right now</div>`;
+      document.getElementById('homeHeadlines').innerHTML = `<div style="color:var(--muted);font-size:13px;padding:20px 0">No stories right now</div>`;
       return;
     }
     document.getElementById('homeHeadlines').innerHTML = headlines.map(a => {
       const cfg = CAT_CONFIG[a.category] || CAT_CONFIG.all;
-      return `<div class="headline-item" onclick="document.querySelectorAll('.bottom-btn').forEach(b=>b.classList.remove('active'));document.querySelector('[data-nav=feed]').classList.add('active');showView('feed');setTimeout(()=>{const i=articles.findIndex(x=>x.id===${JSON.stringify(a.id)});if(i>-1){currentIdx=i;renderCard(articles[i]);}},300)">
+      return `<div class="headline-item" onclick="document.querySelectorAll('.bottom-btn').forEach(b=>b.classList.remove('active'));document.querySelector('[data-nav=feed]').classList.add('active');showView('feed');">
         ${a.image_url ? `<img class="headline-item-img" src="${a.image_url}" alt="" onerror="this.style.display='none'">` : `<div class="headline-item-img" style="background:${cfg.bgDark}"></div>`}
         <div class="headline-item-body">
           <div class="headline-item-title">${a.title}</div>
@@ -2352,7 +2285,7 @@ async function loadTopHeadlines() {
       </div>`;
     }).join('');
   } catch(e) {
-    document.getElementById('homeHeadlines').innerHTML = `<div style="color:var(--muted);font-size:13px">Unable to load headlines</div>`;
+    document.getElementById('homeHeadlines').innerHTML = `<div style="color:var(--muted);font-size:13px;padding:20px 0">Unable to load</div>`;
   }
 }
 
