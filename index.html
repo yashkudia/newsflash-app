@@ -2190,37 +2190,36 @@ if ('serviceWorker' in navigator) {
 
 // ─── HOME DASHBOARD ──────────────────────────────────────────────────────
 const DAILY_QUOTES = [
-  {text:"The only way to do great work is to love what you do.", author:"Steve Jobs"},
-  {text:"Stay hungry, stay foolish.", author:"Steve Jobs"},
-  {text:"In the middle of difficulty lies opportunity.", author:"Albert Einstein"},
-  {text:"The best time to plant a tree was 20 years ago. The second best time is now.", author:"Chinese Proverb"},
-  {text:"Be the change you wish to see in the world.", author:"Mahatma Gandhi"},
-  {text:"It is during our darkest moments that we must focus to see the light.", author:"Aristotle"},
-  {text:"The future belongs to those who believe in the beauty of their dreams.", author:"Eleanor Roosevelt"},
-  {text:"Success is not final, failure is not fatal: it is the courage to continue that counts.", author:"Winston Churchill"},
-  {text:"What you get by achieving your goals is not as important as what you become by achieving your goals.", author:"Zig Ziglar"},
-  {text:"Believe you can and you're halfway there.", author:"Theodore Roosevelt"},
-  {text:"The mind is everything. What you think you become.", author:"Buddha"},
-  {text:"Do what you can, with what you have, where you are.", author:"Theodore Roosevelt"},
-  {text:"Act as if what you do makes a difference. It does.", author:"William James"},
-  {text:"Happiness is not something ready made. It comes from your own actions.", author:"Dalai Lama"},
-  {text:"Life is what happens when you're busy making other plans.", author:"John Lennon"},
-  {text:"You miss 100% of the shots you don't take.", author:"Wayne Gretzky"},
-  {text:"Everything you've ever wanted is on the other side of fear.", author:"George Addair"},
-  {text:"The only impossible journey is the one you never begin.", author:"Tony Robbins"},
-  {text:"What we think, we become.", author:"Buddha"},
-  {text:"Turn your wounds into wisdom.", author:"Oprah Winfrey"},
-  {text:"It always seems impossible until it's done.", author:"Nelson Mandela"},
-  {text:"The secret of getting ahead is getting started.", author:"Mark Twain"},
-  {text:"Don't watch the clock; do what it does. Keep going.", author:"Sam Levenson"},
-  {text:"Quality is not an act, it is a habit.", author:"Aristotle"},
-  {text:"Dream big and dare to fail.", author:"Norman Vaughan"},
-  {text:"Well done is better than well said.", author:"Benjamin Franklin"},
-  {text:"If you want to lift yourself up, lift up someone else.", author:"Booker T. Washington"},
-  {text:"Strive not to be a success, but rather to be of value.", author:"Albert Einstein"},
-  {text:"The best revenge is massive success.", author:"Frank Sinatra"},
-  {text:"I have not failed. I've just found 10,000 ways that won't work.", author:"Thomas Edison"},
-  {text:"A person who never made a mistake never tried anything new.", author:"Albert Einstein"},
+  {text:"The unexamined life is not worth living.", author:"Socrates"},
+  {text:"We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author:"Aristotle"},
+  {text:"The only true wisdom is in knowing you know nothing.", author:"Socrates"},
+  {text:"Give me a lever long enough and a fulcrum on which to place it, and I shall move the world.", author:"Archimedes"},
+  {text:"Be kind, for everyone you meet is fighting a hard battle.", author:"Plato"},
+  {text:"No man is free who is not master of himself.", author:"Epictetus"},
+  {text:"He who is not a good servant will not be a good master.", author:"Plato"},
+  {text:"It is the mark of an educated mind to be able to entertain a thought without accepting it.", author:"Aristotle"},
+  {text:"The soul takes nothing with her to the next world but her education and her culture.", author:"Plato"},
+  {text:"Waste no more time arguing about what a good man should be. Be one.", author:"Marcus Aurelius"},
+  {text:"Man is the measure of all things.", author:"Protagoras"},
+  {text:"The beginning of wisdom is the definition of terms.", author:"Socrates"},
+  {text:"Happiness depends upon ourselves.", author:"Aristotle"},
+  {text:"Know thyself.", author:"Thales of Miletus"},
+  {text:"Eureka! I have found it!", author:"Archimedes"},
+  {text:"The mind is not a vessel to be filled, but a fire to be kindled.", author:"Plutarch"},
+  {text:"There is nothing permanent except change.", author:"Heraclitus"},
+  {text:"Courage is knowing what not to fear.", author:"Plato"},
+  {text:"You have power over your mind, not outside events. Realize this, and you will find strength.", author:"Marcus Aurelius"},
+  {text:"The whole is greater than the sum of its parts.", author:"Aristotle"},
+  {text:"Difficulties strengthen the mind, as labor does the body.", author:"Seneca"},
+  {text:"He who has a why to live can bear almost any how.", author:"Epictetus"},
+  {text:"Education is the kindling of a flame, not the filling of a vessel.", author:"Socrates"},
+  {text:"The obstacle is the way.", author:"Marcus Aurelius"},
+  {text:"To find yourself, think for yourself.", author:"Socrates"},
+  {text:"A great city is not to be confounded with a populous one.", author:"Aristotle"},
+  {text:"Nothing exists except atoms and empty space; everything else is opinion.", author:"Democritus"},
+  {text:"The measure of a man is what he does with power.", author:"Plato"},
+  {text:"It is not death that a man should fear, but he should fear never beginning to live.", author:"Marcus Aurelius"},
+  {text:"No great thing is created suddenly.", author:"Epictetus"},
 ];
 
 function getDailyQuote() {
@@ -2275,13 +2274,13 @@ async function loadHomeWeather() {
       } catch(e2) { cityName = 'Your location'; }
     }
 
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto');
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=temperature_2m,weather_code,apparent_temperature,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto');
     const data = await res.json();
     const c = data.current;
     const icons = {0:'\u2600\uFE0F',1:'\uD83C\uDF24',2:'\u26C5',3:'\u2601\uFE0F',45:'\uD83C\uDF2B',51:'\uD83C\uDF26',53:'\uD83C\uDF27',61:'\uD83C\uDF27',63:'\uD83C\uDF27',71:'\uD83C\uDF28',73:'\u2744\uFE0F',80:'\uD83C\uDF26',82:'\u26C8',95:'\u26C8'};
     const names = {0:'Clear',1:'Clear',2:'Cloudy',3:'Overcast',45:'Fog',51:'Drizzle',53:'Rain',61:'Rain',63:'Rain',71:'Snow',73:'Snow',80:'Showers',82:'Storm',95:'Thunder'};
 
-    el.innerHTML = '<div style="flex:1;display:flex;align-items:center;gap:10px"><span class="home-weather-temp">' + Math.round(c.temperature_2m) + '\u00B0 ' + (icons[c.weather_code]||'\uD83C\uDF24') + '</span><span class="home-weather-cond">' + (names[c.weather_code]||'--') + '</span></div><span class="home-weather-city" onclick="openCityPicker()">' + cityName + '</span>';
+    el.innerHTML = '<div style="flex:1"><div style="display:flex;align-items:center;gap:10px"><span class="home-weather-temp">' + Math.round(c.temperature_2m) + '\u00B0 ' + (icons[c.weather_code]||'\uD83C\uDF24') + '</span><span class="home-weather-cond">' + (names[c.weather_code]||'--') + '</span></div><div style="font-size:11px;color:var(--muted);margin-top:4px">Feels ' + Math.round(c.apparent_temperature) + '\u00B0 \u00B7 Wind ' + Math.round(c.wind_speed_10m) + ' mph</div></div><span class="home-weather-city" onclick="openCityPicker()">' + cityName + '</span>';
   } catch(e) {
     el.innerHTML = '<div style="flex:1;display:flex;align-items:center;gap:10px"><span class="home-weather-temp">--\u00B0</span><span class="home-weather-cond">Tap to set city</span></div><span class="home-weather-city" onclick="openCityPicker()">Set city</span>';
   }
@@ -2369,14 +2368,15 @@ async function loadHomeTrending() {
 
 function renderHomeStories(list) {
   const el = document.getElementById('homeHeadlines');
-  el.innerHTML = list.map(function(a) {
+  el.innerHTML = list.map(function(a, idx) {
     const title = a.title || '';
     const source = a.source || '';
     const cat = a.category || 'all';
     const cfg = CAT_CONFIG[cat] || CAT_CONFIG.all;
     const img = a.image_url || a.image || '';
     const time = a.published_at ? relTime(a.published_at) : (a.time || '');
-    return '<div class="headline-item" onclick="document.querySelectorAll(\'.bottom-btn\').forEach(function(b){b.classList.remove(\'active\')});document.querySelector(\'[data-nav=feed]\').classList.add(\'active\');showView(\'feed\');">' +
+    const articleId = a.id || '';
+    return '<div class="headline-item" onclick="goToStory(' + JSON.stringify(articleId) + ')">' +
       '<div class="headline-item-body">' +
         '<div class="headline-item-title">' + title + '</div>' +
         '<div class="headline-item-meta"><span class="headline-item-cat" style="background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.label + '</span>' + source + ' \u00B7 ' + time + '</div>' +
@@ -2384,6 +2384,22 @@ function renderHomeStories(list) {
       (img ? '<img class="headline-item-img" src="' + img + '" alt="" onerror="this.style.display=\'none\'">' : '') +
     '</div>';
   }).join('');
+}
+
+function goToStory(id) {
+  // Switch to feed view
+  document.querySelectorAll('.bottom-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelector('[data-nav=feed]').classList.add('active');
+  showView('feed');
+  // Find the article in the feed and jump to it
+  setTimeout(function() {
+    const idx = articles.findIndex(function(a) { return a.id === id; });
+    if (idx > -1) {
+      currentIdx = idx;
+      renderCard(articles[idx]);
+      updateProgress();
+    }
+  }, 200);
 }
 // ─── BOOT ──────────────────────────────────────────────────────────────────
 const _storyParam = new URLSearchParams(window.location.search).get('story');
