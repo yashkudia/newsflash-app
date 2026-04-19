@@ -587,8 +587,55 @@ body {
 .home-weather-cond { font-size:13px; color:var(--dim); }
 .home-weather-city {
   font-size:12px; color:var(--accent); font-weight:600;
-  text-decoration:underline; text-underline-offset:2px;
+  cursor:pointer; text-decoration:underline; text-underline-offset:2px;
 }
+
+/* City picker */
+.city-picker {
+  display:none; background:var(--card-bg); border-radius:14px;
+  border:1px solid var(--border); padding:14px;
+  margin-bottom:16px; margin-top:4px;
+}
+.city-picker.open { display:block; }
+.city-picker-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:12px;
+}
+.city-picker-title {
+  font-family:var(--serif); font-size:15px; font-weight:700; color:var(--text);
+}
+.city-picker-close {
+  background:none; border:none; font-size:22px; color:var(--dim);
+  cursor:pointer; padding:0; line-height:1;
+}
+.city-picker-input {
+  width:100%; padding:10px 12px; border:1px solid var(--border);
+  border-radius:10px; background:var(--surface); color:var(--text);
+  font-size:14px; font-family:var(--sans); outline:none;
+  box-sizing:border-box;
+}
+.city-picker-input:focus { border-color:var(--accent); }
+.city-picker-results {
+  max-height:160px; overflow-y:auto; margin-top:8px;
+}
+.city-picker-result {
+  padding:10px 12px; cursor:pointer; border-radius:8px;
+  font-size:13px; color:var(--text);
+}
+.city-picker-result:hover, .city-picker-result:active {
+  background:var(--surface);
+}
+.city-picker-result-sub {
+  font-size:11px; color:var(--muted); margin-top:2px;
+}
+.city-picker-gps {
+  display:flex; align-items:center; gap:8px;
+  width:100%; padding:10px 12px; margin-top:10px;
+  background:var(--accent-dim); border:1px solid var(--accent);
+  border-radius:10px; color:var(--accent); font-size:13px;
+  font-weight:600; cursor:pointer; font-family:var(--sans);
+}
+.city-picker-gps:active { opacity:.7; }
 
 .home-quote {
   font-size:14px; color:var(--dim); font-style:italic;
@@ -607,28 +654,6 @@ body {
   color:var(--text); margin-bottom:10px;
 }
 
-.home-markets { display:flex; gap:10px; margin-bottom:22px; }
-
-.home-tv-widget {
-  margin-bottom:10px; border-radius:12px; overflow:hidden;
-  border:1px solid var(--border);
-  background:var(--card-bg);
-}
-.home-market-card {
-  flex:1; background:var(--card-bg); border-radius:14px;
-  padding:14px; border:1px solid var(--border);
-}
-.home-market-card .market-symbol {
-  font-size:11px; font-weight:700; color:var(--muted);
-  text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;
-}
-.home-market-card .market-price {
-  font-family:var(--serif); font-size:20px; font-weight:700;
-  color:var(--text); margin-bottom:4px; letter-spacing:-.3px;
-}
-.home-market-card .market-change { font-size:11px; font-weight:700; }
-.home-market-card .market-change.up { color:#34d399; }
-.home-market-card .market-change.down { color:#f43f5e; }
 
 .home-headlines { display:flex; flex-direction:column; }
 .headline-item {
@@ -880,31 +905,29 @@ body {
             <span class="home-weather-temp">--°</span>
             <span class="home-weather-cond">Loading...</span>
           </div>
-          <span class="home-weather-city" id="weatherCity" onclick="changeWeatherCity()" style="cursor:pointer">--</span>
+          <span class="home-weather-city" id="weatherCity" onclick="openCityPicker()">--</span>
         </div>
+      </div>
+
+      <!-- City picker overlay -->
+      <div class="city-picker" id="cityPicker">
+        <div class="city-picker-header">
+          <div class="city-picker-title">Change city</div>
+          <button class="city-picker-close" onclick="closeCityPicker()">&times;</button>
+        </div>
+        <input class="city-picker-input" id="cityInput" type="text" placeholder="Search city..." autocomplete="off"/>
+        <div class="city-picker-results" id="cityResults"></div>
+        <button class="city-picker-gps" onclick="useGpsLocation()">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="8"/></svg>
+          Use my current location
+        </button>
       </div>
 
       <!-- Daily quote -->
       <div class="home-quote" id="homeQuote"></div>
 
-      <!-- Markets -->
-      <div class="home-section-title">Markets</div>
-      <div class="home-tv-widget">
-        <iframe src="https://s.tradingview.com/embed-widget/tickers/?locale=en#%7B%22symbols%22%3A%5B%7B%22description%22%3A%22S%26P%20500%22%2C%22proName%22%3A%22FOREXCOM%3ASPX500%22%7D%2C%7B%22description%22%3A%22Dow%20Jones%22%2C%22proName%22%3A%22FOREXCOM%3ADJI%22%7D%2C%7B%22description%22%3A%22Nasdaq%22%2C%22proName%22%3A%22NASDAQ%3AQQQM%22%7D%5D%2C%22isTransparent%22%3Atrue%2C%22showSymbolLogo%22%3Afalse%2C%22colorTheme%22%3A%22light%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A54%7D" style="width:100%;height:54px;border:none;overflow:hidden;border-radius:12px;" id="tvWidget"></iframe>
-      </div>
-      <div class="home-markets" id="homeMarkets">
-        <div class="home-market-card" id="marketBtc">
-          <div class="market-symbol">BTC</div>
-          <div class="market-price">--</div>
-        </div>
-        <div class="home-market-card" id="marketEth">
-          <div class="market-symbol">ETH</div>
-          <div class="market-price">--</div>
-        </div>
-      </div>
-
-      <!-- Latest stories -->
-      <div class="home-section-title">Latest stories</div>
+      <!-- Trending stories -->
+      <div class="home-section-title">Trending</div>
       <div class="home-headlines" id="homeHeadlines">
         <div style="color:var(--muted);font-size:13px;padding:20px 0">Loading...</div>
       </div>
@@ -2217,22 +2240,21 @@ function loadHomeDashboard() {
   document.getElementById('homeDateLine').textContent = new Date().toLocaleDateString('en-US', opts);
 
   const quote = getDailyQuote();
-  document.getElementById('homeQuote').innerHTML = '"' + quote.text + '"<div class="home-quote-author">— ' + quote.author + '</div>';
+  document.getElementById('homeQuote').innerHTML = '"' + quote.text + '"<div class="home-quote-author">\u2014 ' + quote.author + '</div>';
 
   loadHomeWeather();
-  loadHomeMarkets();
-  loadHomeHeadlines();
+  loadHomeTrending();
 }
 
 async function loadHomeWeather() {
   const el = document.getElementById('homeWeather');
   const savedCity = localStorage.getItem('nf_weather_city');
-  
+
   try {
     let lat, lon, cityName;
-    
+
     if (savedCity) {
-      const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(savedCity) + '&count=1');
+      const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(savedCity) + '&count=1&language=en');
       const geoData = await geoRes.json();
       if (geoData.results && geoData.results.length) {
         lat = geoData.results[0].latitude;
@@ -2241,83 +2263,128 @@ async function loadHomeWeather() {
       } else throw new Error('City not found');
     } else {
       const geo = await new Promise(function(resolve, reject) {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {timeout:5000});
+        navigator.geolocation.getCurrentPosition(resolve, reject, {timeout:8000, enableHighAccuracy:false});
       });
       lat = geo.coords.latitude;
       lon = geo.coords.longitude;
+      // Reverse geocode
       try {
-        const revRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?latitude=' + lat + '&longitude=' + lon + '&count=1');
+        const revRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + lat.toFixed(2) + ',' + lon.toFixed(2) + '&count=1&language=en');
         const revData = await revRes.json();
-        cityName = revData.results ? revData.results[0].name : 'Your location';
+        cityName = (revData.results && revData.results[0]) ? revData.results[0].name : 'Your location';
       } catch(e2) { cityName = 'Your location'; }
     }
-    
+
     const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto');
     const data = await res.json();
     const c = data.current;
     const icons = {0:'\u2600\uFE0F',1:'\uD83C\uDF24',2:'\u26C5',3:'\u2601\uFE0F',45:'\uD83C\uDF2B',51:'\uD83C\uDF26',53:'\uD83C\uDF27',61:'\uD83C\uDF27',63:'\uD83C\uDF27',71:'\uD83C\uDF28',73:'\u2744\uFE0F',80:'\uD83C\uDF26',82:'\u26C8',95:'\u26C8'};
     const names = {0:'Clear',1:'Clear',2:'Cloudy',3:'Overcast',45:'Fog',51:'Drizzle',53:'Rain',61:'Rain',63:'Rain',71:'Snow',73:'Snow',80:'Showers',82:'Storm',95:'Thunder'};
-    
-    el.innerHTML = '<div style="flex:1;display:flex;align-items:center;gap:10px"><span class="home-weather-temp">' + Math.round(c.temperature_2m) + '\u00B0 ' + (icons[c.weather_code]||'\uD83C\uDF24') + '</span><span class="home-weather-cond">' + (names[c.weather_code]||'--') + '</span></div><span class="home-weather-city" onclick="changeWeatherCity()" style="cursor:pointer">' + cityName + '</span>';
+
+    el.innerHTML = '<div style="flex:1;display:flex;align-items:center;gap:10px"><span class="home-weather-temp">' + Math.round(c.temperature_2m) + '\u00B0 ' + (icons[c.weather_code]||'\uD83C\uDF24') + '</span><span class="home-weather-cond">' + (names[c.weather_code]||'--') + '</span></div><span class="home-weather-city" onclick="openCityPicker()">' + cityName + '</span>';
   } catch(e) {
-    el.innerHTML = '<div style="flex:1;display:flex;align-items:center;gap:10px"><span class="home-weather-temp">--\u00B0</span><span class="home-weather-cond">Location off</span></div><span class="home-weather-city" onclick="changeWeatherCity()" style="cursor:pointer">Set city</span>';
+    el.innerHTML = '<div style="flex:1;display:flex;align-items:center;gap:10px"><span class="home-weather-temp">--\u00B0</span><span class="home-weather-cond">Tap to set city</span></div><span class="home-weather-city" onclick="openCityPicker()">Set city</span>';
   }
 }
 
-function changeWeatherCity() {
-  const city = prompt('Enter city name (e.g. New York, London, Delhi).\nLeave empty to use your GPS location:');
-  if (city && city.trim()) {
-    localStorage.setItem('nf_weather_city', city.trim());
-    loadHomeWeather();
-  } else if (city === '') {
-    localStorage.removeItem('nf_weather_city');
-    loadHomeWeather();
-  }
+// City picker
+function openCityPicker() {
+  document.getElementById('cityPicker').classList.add('open');
+  document.getElementById('cityInput').value = '';
+  document.getElementById('cityResults').innerHTML = '';
+  setTimeout(function() { document.getElementById('cityInput').focus(); }, 100);
+}
+function closeCityPicker() {
+  document.getElementById('cityPicker').classList.remove('open');
 }
 
-async function loadHomeMarkets() {
-  try {
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
-    const data = await res.json();
-    
-    const btcPrice = data.bitcoin ? data.bitcoin.usd : 0;
-    const btcChange = data.bitcoin ? data.bitcoin.usd_24h_change : 0;
-    const btcUp = btcChange >= 0;
-    document.getElementById('marketBtc').innerHTML = '<div class="market-symbol">BTC</div><div class="market-price">$' + (btcPrice/1000).toFixed(1) + 'K</div><div class="market-change ' + (btcUp?'up':'down') + '">' + (btcUp?'+':'') + btcChange.toFixed(1) + '%</div>';
-    
-    const ethPrice = data.ethereum ? data.ethereum.usd : 0;
-    const ethChange = data.ethereum ? data.ethereum.usd_24h_change : 0;
-    const ethUp = ethChange >= 0;
-    document.getElementById('marketEth').innerHTML = '<div class="market-symbol">ETH</div><div class="market-price">$' + ethPrice.toFixed(0) + '</div><div class="market-change ' + (ethUp?'up':'down') + '">' + (ethUp?'+':'') + ethChange.toFixed(1) + '%</div>';
-  } catch(e) {
-    document.getElementById('marketBtc').innerHTML = '<div class="market-symbol">BTC</div><div class="market-price">--</div>';
-    document.getElementById('marketEth').innerHTML = '<div class="market-symbol">ETH</div><div class="market-price">--</div>';
+let citySearchTimer = null;
+document.addEventListener('DOMContentLoaded', function() {
+  const cityInput = document.getElementById('cityInput');
+  if (cityInput) {
+    cityInput.addEventListener('input', function() {
+      clearTimeout(citySearchTimer);
+      const q = cityInput.value.trim();
+      if (q.length < 2) { document.getElementById('cityResults').innerHTML = ''; return; }
+      citySearchTimer = setTimeout(async function() {
+        try {
+          const res = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=5&language=en');
+          const data = await res.json();
+          if (!data.results || !data.results.length) {
+            document.getElementById('cityResults').innerHTML = '<div style="padding:10px;color:var(--muted);font-size:13px">No cities found</div>';
+            return;
+          }
+          document.getElementById('cityResults').innerHTML = data.results.map(function(r) {
+            return '<div class="city-picker-result" onclick="selectCity(\'' + r.name.replace(/'/g,"\\'") + '\')">' +
+              '<div>' + r.name + '</div>' +
+              '<div class="city-picker-result-sub">' + (r.admin1 || '') + (r.admin1 && r.country ? ', ' : '') + (r.country || '') + '</div>' +
+            '</div>';
+          }).join('');
+        } catch(e) {
+          document.getElementById('cityResults').innerHTML = '<div style="padding:10px;color:var(--muted);font-size:13px">Search failed</div>';
+        }
+      }, 300);
+    });
   }
+});
+
+function selectCity(name) {
+  localStorage.setItem('nf_weather_city', name);
+  closeCityPicker();
+  loadHomeWeather();
 }
 
-async function loadHomeHeadlines() {
+function useGpsLocation() {
+  localStorage.removeItem('nf_weather_city');
+  closeCityPicker();
+  loadHomeWeather();
+}
+
+async function loadHomeTrending() {
   const el = document.getElementById('homeHeadlines');
   try {
+    // Use the same articles array that the feed uses
+    if (articles && articles.length > 0) {
+      renderHomeStories(articles.slice(0, 10));
+      return;
+    }
+    // Fallback: fetch directly from Supabase
     const url = SUPABASE_URL + '/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&order=published_at.desc&limit=10';
     const res = await fetch(url, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
     });
-    const headlines = await res.json();
-    console.log('Headlines loaded:', headlines.length);
-    if (!headlines || !headlines.length) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    console.log('Home stories fetched:', data.length);
+    if (!data || !data.length) {
       el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0">No stories yet</div>';
       return;
     }
-    el.innerHTML = headlines.map(function(a) {
-      var cfg = CAT_CONFIG[a.category] || CAT_CONFIG.all;
-      return '<div class="headline-item" onclick="document.querySelectorAll(\'.bottom-btn\').forEach(function(b){b.classList.remove(\'active\')});document.querySelector(\'[data-nav=feed]\').classList.add(\'active\');showView(\'feed\');"><div class="headline-item-body"><div class="headline-item-title">' + a.title + '</div><div class="headline-item-meta"><span class="headline-item-cat" style="background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.label + '</span>' + a.source + ' \u00B7 ' + relTime(a.published_at) + '</div></div>' + (a.image_url ? '<img class="headline-item-img" src="' + a.image_url + '" alt="" onerror="this.style.display=\'none\'">' : '') + '</div>';
-    }).join('');
+    renderHomeStories(data);
   } catch(e) {
-    console.error('Headlines error:', e);
+    console.error('Home stories error:', e);
     el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0">Unable to load stories</div>';
   }
 }
 
+function renderHomeStories(list) {
+  const el = document.getElementById('homeHeadlines');
+  el.innerHTML = list.map(function(a) {
+    const title = a.title || '';
+    const source = a.source || '';
+    const cat = a.category || 'all';
+    const cfg = CAT_CONFIG[cat] || CAT_CONFIG.all;
+    const img = a.image_url || a.image || '';
+    const time = a.published_at ? relTime(a.published_at) : (a.time || '');
+    return '<div class="headline-item" onclick="document.querySelectorAll(\'.bottom-btn\').forEach(function(b){b.classList.remove(\'active\')});document.querySelector(\'[data-nav=feed]\').classList.add(\'active\');showView(\'feed\');">' +
+      '<div class="headline-item-body">' +
+        '<div class="headline-item-title">' + title + '</div>' +
+        '<div class="headline-item-meta"><span class="headline-item-cat" style="background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.label + '</span>' + source + ' \u00B7 ' + time + '</div>' +
+      '</div>' +
+      (img ? '<img class="headline-item-img" src="' + img + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+    '</div>';
+  }).join('');
+}
 // ─── BOOT ──────────────────────────────────────────────────────────────────
 const _storyParam = new URLSearchParams(window.location.search).get('story');
 if (_storyParam) {
