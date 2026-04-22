@@ -1240,7 +1240,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
       const topCats = getTopCategories(3);
       const allResults = [];
       for (const tc of topCats) {
-        const catUrl = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=5&category=eq.${tc}&language=eq.${currentLang}`;
+        const catUrl = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&category=eq.${tc}`;
         const res = await fetch(catUrl, {
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
           signal: AbortSignal.timeout(5000)
@@ -1252,47 +1252,67 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
       }
       data = allResults;
       if (!data.length) throw new Error('No personalized stories yet');
-      // Sort by preference weight
       data.sort((a, b) => (prefs[b.category] || 0) - (prefs[a.category] || 0));
 
-    } else {
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&offset=${page * 10}&language=eq.${currentLang}`;
+    } else if (cat === 'trending') {
+      // SMART FEED: fetch 50 latest articles, then smart-sort
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50`;
+      const res = await fetch(url, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+      if (!data || !data.length) throw new Error('Empty response');
 
-      if (cat === 'trending') {
-          url += `&is_trending=eq.true`;
-      } else if (cat === 'sports' && sub !== 'all') {
-          url += `&category=eq.sports&subcategory=eq.${sub}`;
+      // Score each article: trending boost + freshness + user pref
+      const now = Date.now();
+      data.forEach(a => {
+        let score = 0;
+        // Trending boost
+        if (a.is_trending) score += 30;
+        // Freshness: articles from last 6 hours get max boost, decays over 72 hours
+        const ageHours = (now - new Date(a.published_at).getTime()) / 3600000;
+        score += Math.max(0, 25 - (ageHours * 0.35));
+        // User preference boost
+        score += (prefs[a.category] || 0) * 0.5;
+        // Image boost (articles with images look better in cards)
+        if (a.image_url) score += 5;
+        // Small random factor to keep it fresh
+        score += Math.random() * 8;
+        a._score = score;
+      });
+
+      // Sort by score
+      data.sort((a, b) => b._score - a._score);
+
+      // Category diversity: don't show 3+ from same category in a row
+      data = diversifyCategories(data);
+
+    } else {
+      // Specific category
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30`;
+
+      if (cat === 'sports' && sub !== 'all') {
+        url += `&category=eq.sports&subcategory=eq.${sub}`;
       } else if (cat !== 'all') {
-          url += `&category=eq.${cat}`;
+        url += `&category=eq.${cat}`;
       }
 
       const res = await fetch(url, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         signal: AbortSignal.timeout(5000)
       });
-
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       data = await res.json();
       if (!data || !data.length) throw new Error('Empty response');
-    }
-
-    // Smart sorting: trending and all use weighted sort if user has prefs
-    if ((cat === 'trending' || cat === 'all') && Object.keys(prefs).length > 0) {
-      // Weighted sort — preferred categories float up, with some randomness
-      data.sort((a, b) => {
-        const wA = prefs[a.category] || 0;
-        const wB = prefs[b.category] || 0;
-        if (wA !== wB) return wB - wA;
-        return Math.random() - 0.5;
-      });
-    } else if (cat === 'trending' || cat === 'all') {
-      shuffleArray(data);
     }
 
     articles = data.map(a => ({
       id: a.id || a.url, category: a.category, title: a.title,
       summary: a.summary, full: a.full_text || '',
       source: a.source, time: relTime(a.published_at),
+      published_at: a.published_at,
       url: a.url, image_url: a.image_url || null,
     }));
   } catch (err) {
@@ -1304,6 +1324,38 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
   }
   currentIdx = 0;
   renderCard(articles[0]);
+}
+
+// Ensure no more than 2 articles from same category appear in a row
+function diversifyCategories(arr) {
+  const result = [];
+  const remaining = [...arr];
+  let lastCat = '';
+  let sameCatCount = 0;
+
+  while (remaining.length > 0) {
+    let picked = false;
+    for (let i = 0; i < remaining.length; i++) {
+      if (remaining[i].category !== lastCat || sameCatCount < 2) {
+        const item = remaining.splice(i, 1)[0];
+        if (item.category === lastCat) {
+          sameCatCount++;
+        } else {
+          sameCatCount = 1;
+          lastCat = item.category;
+        }
+        result.push(item);
+        picked = true;
+        break;
+      }
+    }
+    // If all remaining are same category, just add them
+    if (!picked) {
+      result.push(remaining.shift());
+      sameCatCount++;
+    }
+  }
+  return result;
 }
 
 // ─── RENDER CARD ───────────────────────────────────────────────────────────
@@ -1440,9 +1492,9 @@ async function loadMoreArticles() {
   loadingMore = true;
   currentPage++;
   try {
-    let url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&offset=${currentPage * 10}&language=eq.${currentLang}`;
+    let url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=20&offset=${currentPage * 20}`;
     if (currentCat === 'trending') {
-        url += `&is_trending=eq.true`;
+        // Don't filter — trending tab shows all articles smart-sorted
     } else if (currentCat === 'sports' && currentSub !== 'all') {
         url += `&category=eq.sports&subcategory=eq.${currentSub}`;
     } else if (currentCat !== 'all') {
