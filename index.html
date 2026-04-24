@@ -1267,21 +1267,29 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
       data = await res.json();
       if (!data || !data.length) throw new Error('Empty response');
 
-      // Score each article: trending boost + freshness + user pref
+      // Score each article with multi-signal ranking
       const now = Date.now();
+      const tier1 = ['reuters','associated press','ap news','bbc','cnn','nytimes','new york times','washington post','wall street journal','bloomberg','the guardian','npr','abc news','cbs news','nbc news','politico'];
+      
       data.forEach(a => {
         let score = 0;
-        // Trending boost
-        if (a.is_trending) score += 30;
-        // Freshness: articles from last 6 hours get max boost, decays over 72 hours
+        // 1. Trending flag from pipeline (+35)
+        if (a.is_trending) score += 35;
+        // 2. Source tier (+20) — tier 1 sources rank higher
+        const src = (a.source || '').toLowerCase();
+        if (tier1.some(s => src.includes(s))) score += 20;
+        // 3. Freshness — articles under 3 hours get max boost, decays over 48 hours
         const ageHours = (now - new Date(a.published_at).getTime()) / 3600000;
-        score += Math.max(0, 25 - (ageHours * 0.35));
-        // User preference boost
+        if (ageHours < 3) score += 30;
+        else if (ageHours < 12) score += 20;
+        else if (ageHours < 24) score += 10;
+        else score += Math.max(0, 5 - (ageHours * 0.1));
+        // 4. User preference boost
         score += (prefs[a.category] || 0) * 0.5;
-        // Image boost (articles with images look better in cards)
+        // 5. Image boost
         if (a.image_url) score += 5;
-        // Small random factor to keep it fresh
-        score += Math.random() * 8;
+        // 6. Small randomness to keep feed fresh
+        score += Math.random() * 6;
         a._score = score;
       });
 

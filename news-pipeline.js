@@ -164,13 +164,47 @@ async function deleteOldArticles() {
     else console.log('🗑️  Cleaned articles older than 72 hours');
 }
 
+// ─── SMART TRENDING LOGIC ──────────────────────────────────────────────────
+const TIER_1_SOURCES = [
+    'reuters', 'associated press', 'ap news', 'bbc', 'cnn', 'nytimes',
+    'new york times', 'washington post', 'wall street journal', 'wsj',
+    'bloomberg', 'the guardian', 'al jazeera', 'npr', 'abc news',
+    'cbs news', 'nbc news', 'fox news', 'politico', 'the hill'
+];
+
+const TRENDING_CATEGORIES = ['politics', 'economy', 'tech'];
+
+function calculateTrending(article, aiData) {
+    let score = 0;
+    
+    // 1. Source tier (+40) — top news orgs are more likely to cover trending stories
+    const sourceLower = (article.source.name || '').toLowerCase();
+    if (TIER_1_SOURCES.some(s => sourceLower.includes(s))) score += 40;
+    
+    // 2. AI says trending (+30) — AI's judgment still counts
+    if (aiData.is_trending) score += 30;
+    
+    // 3. Category weight (+15) — politics, economy, tech trend more
+    if (TRENDING_CATEGORIES.includes(aiData.category.toLowerCase())) score += 15;
+    
+    // 4. Recency (+25) — articles under 6 hours old get full boost
+    const ageHours = (Date.now() - new Date(article.publishedAt).getTime()) / 3600000;
+    score += Math.max(0, 25 - (ageHours * 4));
+    
+    // 5. Has image (+5) — trending stories almost always have images
+    if (article.urlToImage) score += 5;
+    
+    // Threshold: 50+ = trending
+    return score >= 50;
+}
+
 // ─── MAIN ──────────────────────────────────────────────────────────────────
 async function runPipeline() {
     console.log("🚀 News Flip Pipeline (Gemini + Groq)\n");
     await deleteOldArticles();
     
     const categories = ['general', 'technology', 'sports', 'business', 'entertainment', 'science', 'health', 'politics'];
-    let totalOk = 0, totalFail = 0;
+    let totalOk = 0, totalFail = 0, totalTrending = 0;
     
     for (const cat of categories) {
         console.log(`\n📂 ${cat.toUpperCase()}`);
@@ -181,13 +215,15 @@ async function runPipeline() {
             console.log(`  📰 ${article.title.slice(0, 55)}...`);
             const ai = await summarizeWithAI(article);
             if (ai && ai.summary) {
+                const isTrending = calculateTrending(article, ai);
+                if (isTrending) totalTrending++;
                 batch.push({
                     title: article.title, summary: ai.summary,
                     full_text: article.content || "Read more at the source.",
                     source: article.source.name, url: article.url,
                     image_url: article.urlToImage,
                     category: ai.category.toLowerCase(),
-                    is_trending: ai.is_trending,
+                    is_trending: isTrending,
                     published_at: article.publishedAt,
                     language: 'en'
                 });
@@ -198,7 +234,7 @@ async function runPipeline() {
         if (batch.length) await saveToDatabase(batch);
     }
 
-    console.log(`\n✨ DONE: ${totalOk} saved, ${totalFail} failed`);
+    console.log(`\n✨ DONE: ${totalOk} saved, ${totalFail} failed, ${totalTrending} trending`);
     console.log(`   AI calls: ${aiCallCount} (Gemini ~${Math.ceil(aiCallCount/2)} + Groq ~${Math.floor(aiCallCount/2)})`);
 }
 
