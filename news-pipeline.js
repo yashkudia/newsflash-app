@@ -188,7 +188,8 @@ async function runPipeline() {
                     image_url: article.urlToImage,
                     category: ai.category.toLowerCase(),
                     is_trending: ai.is_trending,
-                    published_at: article.publishedAt
+                    published_at: article.publishedAt,
+                    language: 'en'
                 });
                 totalOk++;
             } else { totalFail++; }

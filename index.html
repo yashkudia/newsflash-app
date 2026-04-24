@@ -1258,7 +1258,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
 
     } else if (cat === 'trending') {
       // SMART FEED: fetch 50 latest articles, then smart-sort
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50` + (currentLang !== 'en' ? `&language=eq.${currentLang}` : '');
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50&language=eq.${currentLang}`;
       const res = await fetch(url, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         signal: AbortSignal.timeout(8000)
@@ -1293,7 +1293,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
 
     } else {
       // Specific category
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30` + (currentLang !== 'en' ? `&language=eq.${currentLang}` : '');
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30&language=eq.${currentLang}`;
 
       if (cat === 'sports' && sub !== 'all') {
         url += `&category=eq.sports&subcategory=eq.${sub}`;
