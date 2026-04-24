@@ -1006,13 +1006,6 @@ body {
             <button class="font-size-btn" data-scale="1.15">L</button>
           </div>
         </div>
-        <div class="setting-row">
-          <span class="setting-label">Language</span>
-          <div class="font-sizes">
-            <button class="lang-btn active" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="es">ES</button>
-          </div>
-        </div>
       </div>
       <div class="profile-section">
         <div class="setting-row" style="cursor:pointer" onclick="openCollectionPage('liked')">
@@ -1921,7 +1914,7 @@ document.getElementById('searchInput').addEventListener('input', e => {
   searchTimer = setTimeout(async () => {
     results.innerHTML=`<div class="search-empty"><div class="search-empty-text" style="opacity:.5">Searching...</div></div>`;
     try {
-      const searchUrl = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&or=(title.ilike.*${encodeURIComponent(q)}*,source.ilike.*${encodeURIComponent(q)}*,summary.ilike.*${encodeURIComponent(q)}*)&language=eq.${currentLang}&order=published_at.desc&limit=20`;
+      const searchUrl = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&or=(title.ilike.*${encodeURIComponent(q)}*,source.ilike.*${encodeURIComponent(q)}*,summary.ilike.*${encodeURIComponent(q)}*)&order=published_at.desc&limit=20`;
       const res = await fetch(searchUrl, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
       });
@@ -2420,7 +2413,10 @@ async function loadHomeTrending() {
   }
 }
 
+let homeStories = [];
+
 function renderHomeStories(list) {
+  homeStories = list;
   const el = document.getElementById('homeHeadlines');
   el.innerHTML = list.map(function(a, idx) {
     const title = a.title || '';
@@ -2429,8 +2425,7 @@ function renderHomeStories(list) {
     const cfg = CAT_CONFIG[cat] || CAT_CONFIG.all;
     const img = a.image_url || a.image || '';
     const time = a.published_at ? relTime(a.published_at) : (a.time || '');
-    const articleId = a.id || '';
-    return '<div class="headline-item" onclick="goToStory(' + JSON.stringify(articleId) + ')">' +
+    return '<div class="headline-item" onclick="goToStory(' + idx + ')">' +
       '<div class="headline-item-body">' +
         '<div class="headline-item-title">' + title + '</div>' +
         '<div class="headline-item-meta"><span class="headline-item-cat" style="background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.label + '</span>' + source + ' \u00B7 ' + time + '</div>' +
@@ -2440,34 +2435,36 @@ function renderHomeStories(list) {
   }).join('');
 }
 
-function goToStory(id) {
+function goToStory(idx) {
+  const story = homeStories[idx];
+  if (!story) return;
+  
   // Switch to feed view
   document.querySelectorAll('.bottom-btn').forEach(function(b){b.classList.remove('active')});
   document.querySelector('[data-nav=feed]').classList.add('active');
   showView('feed');
   
-  // Try to find article in current feed (handle both number and string IDs)
-  function tryJump() {
-    const idx = articles.findIndex(function(a) { 
-      return a.id == id; // loose comparison to handle number vs string
-    });
-    if (idx > -1) {
-      currentIdx = idx;
-      renderCard(articles[idx]);
-      updateProgress();
-      return true;
-    }
-    return false;
-  }
+  // Convert to feed format and inject
+  const feedArticle = {
+    id: story.id, category: story.category, title: story.title,
+    summary: story.summary || '', full: story.full_text || '',
+    source: story.source, time: relTime(story.published_at),
+    published_at: story.published_at,
+    url: story.url, image_url: story.image_url || null,
+  };
   
-  // Try immediately
   setTimeout(function() {
-    if (!tryJump()) {
-      // Article not in feed — reload feed then try again
-      loadFeed('trending').then(function() {
-        setTimeout(function() { tryJump(); }, 100);
-      });
+    // Try to find in existing feed first
+    const existingIdx = articles.findIndex(function(a) { return a.id == story.id; });
+    if (existingIdx > -1) {
+      currentIdx = existingIdx;
+    } else {
+      // Insert at beginning of feed
+      articles.unshift(feedArticle);
+      currentIdx = 0;
     }
+    renderCard(articles[currentIdx]);
+    updateProgress();
   }, 200);
 }
 // ─── BOOT ──────────────────────────────────────────────────────────────────
