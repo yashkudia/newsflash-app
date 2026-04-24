@@ -12,19 +12,15 @@ jobs:
   fetch-news:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - name: Install dependencies
         run: npm install
-
       - name: Run news pipeline
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
