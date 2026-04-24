@@ -660,7 +660,9 @@ body {
   display:flex; gap:14px; padding:14px 0;
   border-bottom:1px solid var(--border);
   cursor:pointer; align-items:center;
+  -webkit-tap-highlight-color:transparent;
 }
+.headline-item:active { opacity:.6; }
 .headline-item:last-child { border-bottom:none; padding-bottom:0; }
 .headline-item:first-child { padding-top:0; }
 .headline-item-img {
@@ -2443,13 +2445,28 @@ function goToStory(id) {
   document.querySelectorAll('.bottom-btn').forEach(function(b){b.classList.remove('active')});
   document.querySelector('[data-nav=feed]').classList.add('active');
   showView('feed');
-  // Find the article in the feed and jump to it
-  setTimeout(function() {
-    const idx = articles.findIndex(function(a) { return a.id === id; });
+  
+  // Try to find article in current feed (handle both number and string IDs)
+  function tryJump() {
+    const idx = articles.findIndex(function(a) { 
+      return a.id == id; // loose comparison to handle number vs string
+    });
     if (idx > -1) {
       currentIdx = idx;
       renderCard(articles[idx]);
       updateProgress();
+      return true;
+    }
+    return false;
+  }
+  
+  // Try immediately
+  setTimeout(function() {
+    if (!tryJump()) {
+      // Article not in feed — reload feed then try again
+      loadFeed('trending').then(function() {
+        setTimeout(function() { tryJump(); }, 100);
+      });
     }
   }, 200);
 }
