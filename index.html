@@ -1006,6 +1006,13 @@ body {
             <button class="font-size-btn" data-scale="1.15">L</button>
           </div>
         </div>
+        <div class="setting-row">
+          <span class="setting-label">Language</span>
+          <div class="font-sizes">
+            <button class="lang-btn active" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="es">ES</button>
+          </div>
+        </div>
       </div>
       <div class="profile-section">
         <div class="setting-row" style="cursor:pointer" onclick="openCollectionPage('liked')">
@@ -1251,7 +1258,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
 
     } else if (cat === 'trending') {
       // SMART FEED: fetch 50 latest articles, then smart-sort
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50`;
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50` + (currentLang !== 'en' ? `&language=eq.${currentLang}` : '');
       const res = await fetch(url, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         signal: AbortSignal.timeout(8000)
@@ -1286,7 +1293,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
 
     } else {
       // Specific category
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30`;
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30` + (currentLang !== 'en' ? `&language=eq.${currentLang}` : '');
 
       if (cat === 'sports' && sub !== 'all') {
         url += `&category=eq.sports&subcategory=eq.${sub}`;
