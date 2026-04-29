@@ -215,13 +215,20 @@ async function runPipeline() {
             console.log(`  📰 ${article.title.slice(0, 55)}...`);
             const ai = await summarizeWithAI(article);
             if (ai && ai.summary) {
+                // Try to get image — fallback to OG scraping if none
+                let imageUrl = article.urlToImage;
+                if (!imageUrl) {
+                    console.log(`    🖼️  No image, scraping OG...`);
+                    imageUrl = await fetchOgImage(article.url);
+                    if (imageUrl) console.log(`    ✅ Found OG image`);
+                }
                 const isTrending = calculateTrending(article, ai);
                 if (isTrending) totalTrending++;
                 batch.push({
                     title: article.title, summary: ai.summary,
                     full_text: article.content || "Read more at the source.",
                     source: article.source.name, url: article.url,
-                    image_url: article.urlToImage,
+                    image_url: imageUrl,
                     category: ai.category.toLowerCase(),
                     is_trending: isTrending,
                     published_at: article.publishedAt,

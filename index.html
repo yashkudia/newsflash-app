@@ -175,7 +175,7 @@ body {
 
 /* ── Card image — full-bleed hero ── */
 .card-img-wrap {
-  position:relative; width:100%; flex:0 0 var(--img-flex, 38%); overflow:hidden;
+  position:relative; width:100%; flex:0 0 28%; overflow:hidden;
   background:var(--surface);
 }
 .card-img-real {
@@ -229,19 +229,20 @@ body {
 .card-body {
   flex:1; background:var(--card-bg);
   display:flex; flex-direction:column;
-  padding:20px 22px 14px; overflow:hidden;
+  padding:18px 20px 12px; overflow:hidden;
 }
 .card-brand {
   display:none;
 }
 .card-headline {
   font-family:var(--serif);
-  font-size:calc(21px * var(--font-scale)); font-weight:700;
-  line-height:1.22; letter-spacing:-.3px;
-  color:var(--text); margin-bottom:12px;
+  font-size:calc(20px * var(--font-scale)); font-weight:700;
+  line-height:1.25; letter-spacing:-.3px;
+  color:var(--text); margin-bottom:10px;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
 }
 .card-summary {
-  font-size:calc(14.5px * var(--font-scale)); line-height:1.65;
+  font-size:calc(14px * var(--font-scale)); line-height:1.7;
   color:var(--dim); font-weight:400;
   margin-bottom: auto;
   letter-spacing:.1px;
@@ -1006,13 +1007,6 @@ body {
             <button class="font-size-btn" data-scale="1.15">L</button>
           </div>
         </div>
-        <div class="setting-row">
-          <span class="setting-label">Language</span>
-          <div class="font-sizes">
-            <button class="lang-btn active" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="es">ES</button>
-          </div>
-        </div>
       </div>
       <div class="profile-section">
         <div class="setting-row" style="cursor:pointer" onclick="openCollectionPage('liked')">
@@ -1187,7 +1181,7 @@ const storedScale = localStorage.getItem('nf_font_scale');
 if (storedScale) {
   document.documentElement.style.setProperty('--font-scale', storedScale);
   const imgFlex = storedScale === '1.15' ? '28%' : storedScale === '0.9' ? '42%' : '38%';
-  document.documentElement.style.setProperty('--img-flex', imgFlex);
+  
   document.querySelectorAll('.font-size-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.scale === storedScale);
   });
@@ -1258,7 +1252,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
 
     } else if (cat === 'trending') {
       // SMART FEED: fetch 50 latest articles, then smart-sort
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50&language=eq.${currentLang}`;
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50`;
       const res = await fetch(url, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         signal: AbortSignal.timeout(8000)
@@ -1301,7 +1295,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
 
     } else {
       // Specific category
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30&language=eq.${currentLang}`;
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30`;
 
       if (cat === 'sports' && sub !== 'all') {
         url += `&category=eq.sports&subcategory=eq.${sub}`;
@@ -2086,7 +2080,7 @@ document.querySelectorAll('.font-size-btn').forEach(btn => {
     document.documentElement.style.setProperty('--font-scale', scale);
     // Shrink image when text is larger to prevent overflow
     const imgFlex = scale === '1.15' ? '28%' : scale === '0.9' ? '42%' : '38%';
-    document.documentElement.style.setProperty('--img-flex', imgFlex);
+    
     localStorage.setItem('nf_font_scale', scale);
     // Re-render current card to apply
     if (articles[currentIdx]) renderCard(articles[currentIdx]);
