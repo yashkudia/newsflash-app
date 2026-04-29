@@ -175,7 +175,7 @@ body {
 
 /* ── Card image — full-bleed hero ── */
 .card-img-wrap {
-  position:relative; width:100%; flex:0 0 28%; overflow:hidden;
+  position:relative; width:100%; flex:0 0 33%; overflow:hidden;
   background:var(--surface);
 }
 .card-img-real {
@@ -734,35 +734,42 @@ body {
 
 /* ── Onboard ── */
 .onboard {
-  position:absolute; inset:0; background:rgba(15,17,23,0.96);
-  backdrop-filter:blur(16px); z-index:200;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:40px;
+  position:fixed; inset:0; background:var(--bg);
+  z-index:10000;
+  display:flex; flex-direction:column;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
 }
-.light .onboard { background:rgba(245,245,247,0.96); }
+.light .onboard { background:var(--bg); }
+.onboard-inner {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:40px 24px 120px; gap:32px;
+  max-width:400px; margin:0 auto; width:100%;
+}
 .onboard-logo {
-  font-family:var(--serif); font-size:36px; font-weight:900;
+  font-family:var(--serif); font-size:32px; font-weight:900;
   color:var(--text); text-align:center; letter-spacing:-.5px;
 }
 .onboard-tagline {
-  font-size:12px; color:var(--muted); text-align:center;
-  margin-top:6px; letter-spacing:1.2px; text-transform:uppercase; font-weight:600;
+  font-size:11px; color:var(--muted); text-align:center;
+  margin-top:4px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600;
 }
 
 .onboard-gestures {
-  display:flex; flex-direction:column; gap:28px;
-  width:100%; padding:0 48px;
+  display:flex; flex-direction:column; gap:20px;
+  width:100%;
 }
 .onboard-gesture {
-  display:flex; align-items:center; gap:16px;
+  display:flex; align-items:center; gap:14px;
 }
 .gesture-anim {
-  width:48px; height:48px; flex-shrink:0;
-  border-radius:14px; background:var(--surface);
+  width:44px; height:44px; flex-shrink:0;
+  border-radius:12px; background:var(--surface);
   display:flex; align-items:center; justify-content:center;
   position:relative; overflow:hidden;
 }
 .gesture-dot {
-  width:10px; height:10px; border-radius:50%;
+  width:8px; height:8px; border-radius:50%;
   background:var(--accent); position:absolute;
 }
 .gesture-dot.swipe-ud { animation:gestureUD 2s ease-in-out infinite; }
@@ -776,19 +783,31 @@ body {
   50% { transform:translateX(10px); }
 }
 .gesture-text { flex:1; }
-.gesture-label { font-size:15px; font-weight:600; color:var(--text); margin-bottom:2px; }
-.gesture-sub { font-size:12px; color:var(--muted); line-height:1.4; }
+.gesture-label { font-size:14px; font-weight:600; color:var(--text); margin-bottom:1px; }
+.gesture-sub { font-size:11px; color:var(--muted); line-height:1.4; }
 
-.onboard-btn {
-  padding:14px 44px; background:var(--accent-grad); border:none;
-  border-radius:100px; font-size:15px; font-weight:600;
-  color:var(--accent-text); cursor:pointer; margin-top:8px;
-  transition:transform .1s; font-family:var(--sans);
-  position:relative; z-index:210; touch-action:manipulation;
-  letter-spacing:.3px;
+.onboard-section-title {
+  font-size:15px; font-weight:700; color:var(--text); text-align:center;
+  margin-bottom:-8px;
 }
-.onboard-btn:active { transform:scale(.96); }
+
+.onboard-btn-wrap {
+  position:fixed; bottom:0; left:0; right:0;
+  padding:16px 24px; padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top, var(--bg) 60%, transparent);
+  z-index:10001; display:flex; justify-content:center;
+}
+.onboard-btn {
+  width:100%; max-width:360px;
+  padding:16px; background:var(--accent-grad); border:none;
+  border-radius:16px; font-size:16px; font-weight:700;
+  color:var(--accent-text); cursor:pointer;
+  transition:transform .1s; font-family:var(--sans);
+  touch-action:manipulation; letter-spacing:.3px;
+}
+.onboard-btn:active { transform:scale(.97); }
 .onboard.hidden { display:none; }
+.onboard.hidden + .onboard-btn-wrap { display:none; }
 
 /* ── Splash screen ── */
 .splash {
@@ -822,12 +841,12 @@ body {
 /* ── Onboarding interests picker ── */
 .interest-grid {
   display:flex; flex-wrap:wrap; gap:10px;
-  justify-content:center; width:100%; padding:0 24px;
+  justify-content:center; width:100%;
 }
 .interest-chip {
-  padding:10px 20px; border-radius:100px;
-  border:1px solid var(--border2); background:var(--surface);
-  font-size:13px; font-weight:500; color:var(--dim);
+  padding:10px 22px; border-radius:12px;
+  border:1.5px solid var(--border2); background:var(--surface);
+  font-size:14px; font-weight:500; color:var(--dim);
   cursor:pointer; transition:all .2s; user-select:none;
   font-family:var(--sans);
 }
@@ -938,42 +957,44 @@ body {
   </div>
 
   <div class="onboard" id="onboard" role="dialog" aria-label="Welcome to News Flip">
-    <div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-      <img src="icon-192.png" alt="News Flip" style="width:64px;height:64px;border-radius:14px;">
-      <div class="onboard-logo">News Flip</div>
-      <div class="onboard-tagline">Fast news for America</div>
+    <div class="onboard-inner">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <img src="icon-192.png" alt="News Flip" style="width:72px;height:72px;border-radius:16px;">
+        <div class="onboard-logo">News Flip</div>
+        <div class="onboard-tagline">Fast news for America</div>
       </div>
-    </div>
-    <div class="onboard-gestures">
-      <div class="onboard-gesture">
-        <div class="gesture-anim"><div class="gesture-dot swipe-ud"></div></div>
-        <div class="gesture-text">
-          <div class="gesture-label">Swipe up / down</div>
-          <div class="gesture-sub">Flip between stories</div>
+
+      <div class="onboard-gestures">
+        <div class="onboard-gesture">
+          <div class="gesture-anim"><div class="gesture-dot swipe-ud"></div></div>
+          <div class="gesture-text">
+            <div class="gesture-label">Swipe up / down</div>
+            <div class="gesture-sub">Flip between stories</div>
+          </div>
+        </div>
+        <div class="onboard-gesture">
+          <div class="gesture-anim"><div class="gesture-dot swipe-lr"></div></div>
+          <div class="gesture-text">
+            <div class="gesture-label">Swipe left / right</div>
+            <div class="gesture-sub">Switch categories</div>
+          </div>
         </div>
       </div>
-      <div class="onboard-gesture">
-        <div class="gesture-anim"><div class="gesture-dot swipe-lr"></div></div>
-        <div class="gesture-text">
-          <div class="gesture-label">Swipe left / right</div>
-          <div class="gesture-sub">Switch categories</div>
-        </div>
+
+      <div class="onboard-section-title">Pick your interests</div>
+      <div class="interest-grid" id="interestGrid">
+        <div class="interest-chip" data-interest="sports">Sports</div>
+        <div class="interest-chip" data-interest="tech">Tech</div>
+        <div class="interest-chip" data-interest="politics">Politics</div>
+        <div class="interest-chip" data-interest="economy">Economy</div>
+        <div class="interest-chip" data-interest="entertainment">Entertainment</div>
+        <div class="interest-chip" data-interest="science">Science</div>
+        <div class="interest-chip" data-interest="health">Health</div>
       </div>
     </div>
-    <div style="text-align:center;margin-top:8px">
-      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Pick your interests</div>
+    <div class="onboard-btn-wrap">
+      <button class="onboard-btn" id="dismissBtn">Start Flipping</button>
     </div>
-    <div class="interest-grid" id="interestGrid">
-      <div class="interest-chip" data-interest="sports">Sports</div>
-      <div class="interest-chip" data-interest="tech">Tech</div>
-      <div class="interest-chip" data-interest="politics">Politics</div>
-      <div class="interest-chip" data-interest="economy">Economy</div>
-      <div class="interest-chip" data-interest="entertainment">Entertainment</div>
-      <div class="interest-chip" data-interest="science">Science</div>
-      <div class="interest-chip" data-interest="health">Health</div>
-    </div>
-    <button class="onboard-btn" id="dismissBtn">Start Flipping</button>
   </div>
 
   <div class="search-overlay" id="searchOverlay">
