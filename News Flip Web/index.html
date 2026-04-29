@@ -84,7 +84,7 @@ body {
   flex-direction: column;
   position: relative;
   background: var(--bg);
-  overflow: hidden;
+  padding-bottom: 48px;
 }
 
 /* ── Tabs — pill style with inverted active ── */
@@ -175,7 +175,7 @@ body {
 
 /* ── Card image — full-bleed hero ── */
 .card-img-wrap {
-  position:relative; width:100%; flex:0 0 var(--img-flex, 38%); overflow:hidden;
+  position:relative; width:100%; flex:0 0 28%; overflow:hidden;
   background:var(--surface);
 }
 .card-img-real {
@@ -229,19 +229,20 @@ body {
 .card-body {
   flex:1; background:var(--card-bg);
   display:flex; flex-direction:column;
-  padding:20px 22px 14px; overflow:hidden;
+  padding:18px 20px 12px; overflow:hidden;
 }
 .card-brand {
   display:none;
 }
 .card-headline {
   font-family:var(--serif);
-  font-size:calc(21px * var(--font-scale)); font-weight:700;
-  line-height:1.22; letter-spacing:-.3px;
-  color:var(--text); margin-bottom:12px;
+  font-size:calc(20px * var(--font-scale)); font-weight:700;
+  line-height:1.25; letter-spacing:-.3px;
+  color:var(--text); margin-bottom:10px;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
 }
 .card-summary {
-  font-size:calc(14.5px * var(--font-scale)); line-height:1.65;
+  font-size:calc(14px * var(--font-scale)); line-height:1.7;
   color:var(--dim); font-weight:400;
   margin-bottom: auto;
   letter-spacing:.1px;
@@ -351,13 +352,16 @@ body {
 /* ── Bottom bar ── */
 .bottom-bar {
   display:flex; justify-content:space-evenly; align-items:center;
-  padding:6px 0;
-  padding-bottom: calc(6px + env(safe-area-inset-bottom));
-  background:transparent;
-  flex-shrink:0; position:relative; z-index:50;
+  padding:4px 0;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom));
+  background:var(--bg);
+  position:fixed; bottom:0; left:0; right:0;
+  z-index:9999;
+  max-width:440px; margin:0 auto;
+  border-top:1px solid var(--border);
 }
 .bottom-btn {
-  width:48px; height:48px;
+  width:40px; height:40px;
   display:flex; align-items:center; justify-content:center;
   background:none; border:none; cursor:pointer;
   border-radius:50%;
@@ -367,7 +371,7 @@ body {
 }
 .bottom-btn:active { transform:scale(.85); }
 .bottom-btn svg {
-  width:22px; height:22px;
+  width:20px; height:20px;
   fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round;
   position:relative; z-index:1;
 }
@@ -382,11 +386,9 @@ body {
 /* ── Profile overlay ── */
 .profile-overlay {
   position:absolute; inset:0; background:var(--bg); z-index:90;
-  display:flex; flex-direction:column;
-  transform:translateY(100%);
-  transition:transform .32s cubic-bezier(.32,.72,0,1);
+  display:none; flex-direction:column;
 }
-.profile-overlay.open { transform:translateY(0); }
+.profile-overlay.open { display:flex; }
 .profile-top {
   display:flex; align-items:center; justify-content:space-between;
   padding:18px 20px; border-bottom:1px solid var(--border); flex-shrink:0;
@@ -509,11 +511,9 @@ body {
 /* ── Search overlay ── */
 .search-overlay {
   position:absolute; inset:0; background:var(--bg); z-index:90;
-  display:flex; flex-direction:column;
-  transform:translateY(100%);
-  transition:transform .32s cubic-bezier(.32,.72,0,1);
+  display:none; flex-direction:column;
 }
-.search-overlay.open { transform:translateY(0); }
+.search-overlay.open { display:flex; }
 .search-top {
   display:flex; align-items:center; gap:12px;
   padding:16px 20px; border-bottom:1px solid var(--border); flex-shrink:0;
@@ -552,6 +552,137 @@ body {
 .search-result-cat { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:5px; }
 .search-result-title { font-family:var(--serif); font-size:14px; font-weight:700; line-height:1.35; color:var(--text); margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .search-result-source { font-size:11px; color:var(--muted); }
+
+/* ── Home dashboard ── */
+.home-screen {
+  flex:1; overflow:hidden;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+}
+.home-screen.hidden { display:none; }
+
+.home-scroll {
+  flex:1; overflow-y:auto; padding:24px 18px 20px;
+  -webkit-overflow-scrolling:touch;
+}
+
+.home-top { margin-bottom:20px; }
+.home-greeting {
+  font-family:var(--serif); font-size:28px; font-weight:700;
+  color:var(--text); letter-spacing:-.3px;
+}
+.home-date {
+  font-size:13px; color:var(--muted); font-weight:500;
+  margin-top:3px; margin-bottom:14px;
+}
+.home-weather {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 0;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.home-weather-temp {
+  font-family:var(--serif); font-size:28px; font-weight:700;
+  color:var(--text); letter-spacing:-.5px;
+}
+.home-weather-cond { font-size:13px; color:var(--dim); }
+.home-weather-city {
+  font-size:12px; color:var(--accent); font-weight:600;
+  cursor:pointer; text-decoration:underline; text-underline-offset:2px;
+}
+
+/* City picker */
+.city-picker {
+  display:none; background:var(--card-bg); border-radius:14px;
+  border:1px solid var(--border); padding:14px;
+  margin-bottom:16px; margin-top:4px;
+}
+.city-picker.open { display:block; }
+.city-picker-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:12px;
+}
+.city-picker-title {
+  font-family:var(--serif); font-size:15px; font-weight:700; color:var(--text);
+}
+.city-picker-close {
+  background:none; border:none; font-size:22px; color:var(--dim);
+  cursor:pointer; padding:0; line-height:1;
+}
+.city-picker-input {
+  width:100%; padding:10px 12px; border:1px solid var(--border);
+  border-radius:10px; background:var(--surface); color:var(--text);
+  font-size:14px; font-family:var(--sans); outline:none;
+  box-sizing:border-box;
+}
+.city-picker-input:focus { border-color:var(--accent); }
+.city-picker-results {
+  max-height:160px; overflow-y:auto; margin-top:8px;
+}
+.city-picker-result {
+  padding:10px 12px; cursor:pointer; border-radius:8px;
+  font-size:13px; color:var(--text);
+}
+.city-picker-result:hover, .city-picker-result:active {
+  background:var(--surface);
+}
+.city-picker-result-sub {
+  font-size:11px; color:var(--muted); margin-top:2px;
+}
+.city-picker-gps {
+  display:flex; align-items:center; gap:8px;
+  width:100%; padding:10px 12px; margin-top:10px;
+  background:var(--accent-dim); border:1px solid var(--accent);
+  border-radius:10px; color:var(--accent); font-size:13px;
+  font-weight:600; cursor:pointer; font-family:var(--sans);
+}
+.city-picker-gps:active { opacity:.7; }
+
+.home-quote {
+  font-size:14px; color:var(--dim); font-style:italic;
+  line-height:1.6; padding:14px 16px;
+  background:var(--card-bg); border-radius:14px;
+  border-left:3px solid var(--accent);
+  margin:20px 0 22px;
+}
+.home-quote-author {
+  font-size:11px; color:var(--muted); font-style:normal;
+  margin-top:6px; font-weight:600;
+}
+
+.home-section-title {
+  font-family:var(--serif); font-size:17px; font-weight:700;
+  color:var(--text); margin-bottom:10px;
+}
+
+
+.home-headlines { display:flex; flex-direction:column; }
+.headline-item {
+  display:flex; gap:14px; padding:14px 0;
+  border-bottom:1px solid var(--border);
+  cursor:pointer; align-items:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.headline-item:active { opacity:.6; }
+.headline-item:last-child { border-bottom:none; padding-bottom:0; }
+.headline-item:first-child { padding-top:0; }
+.headline-item-img {
+  width:64px; height:64px; border-radius:12px;
+  object-fit:cover; flex-shrink:0; background:var(--surface);
+}
+.headline-item-body { flex:1; min-width:0; }
+.headline-item-title {
+  font-family:var(--serif); font-size:14px; font-weight:600;
+  line-height:1.3; color:var(--text); margin-bottom:5px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.headline-item-meta { font-size:11px; color:var(--muted); }
+.headline-item-cat {
+  display:inline-block; font-size:9px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px;
+  padding:2px 6px; border-radius:4px; margin-right:6px;
+}
+
 
 /* ── Collection page (Liked / Bookmarked) ── */
 .collection-overlay {
@@ -765,11 +896,46 @@ body {
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
   </div>
 
-  <nav class="bottom-bar" role="navigation" aria-label="Main navigation">
-    <button class="bottom-btn active" data-nav="feed" aria-label="Home feed"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
-    <button class="bottom-btn" data-nav="search" aria-label="Search stories"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
-    <button class="bottom-btn" data-nav="profile" aria-label="Profile and settings"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
-  </nav>
+  <!-- Home Dashboard -->
+  <div class="home-screen hidden" id="homeScreen">
+    <div class="home-scroll">
+      <!-- Greeting + Date + Weather -->
+      <div class="home-top">
+        <div class="home-greeting" id="homeGreeting">Good afternoon</div>
+        <div class="home-date" id="homeDateLine"></div>
+        <div class="home-weather" id="homeWeather">
+          <div style="flex:1;display:flex;align-items:center;gap:10px">
+            <span class="home-weather-temp">--°</span>
+            <span class="home-weather-cond">Loading...</span>
+          </div>
+          <span class="home-weather-city" id="weatherCity" onclick="openCityPicker()">--</span>
+        </div>
+      </div>
+
+      <!-- City picker overlay -->
+      <div class="city-picker" id="cityPicker">
+        <div class="city-picker-header">
+          <div class="city-picker-title">Change city</div>
+          <button class="city-picker-close" onclick="closeCityPicker()">&times;</button>
+        </div>
+        <input class="city-picker-input" id="cityInput" type="text" placeholder="Search city..." autocomplete="off"/>
+        <div class="city-picker-results" id="cityResults"></div>
+        <button class="city-picker-gps" onclick="useGpsLocation()">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="8"/></svg>
+          Use my current location
+        </button>
+      </div>
+
+      <!-- Daily quote -->
+      <div class="home-quote" id="homeQuote"></div>
+
+      <!-- Trending stories -->
+      <div class="home-section-title">Trending</div>
+      <div class="home-headlines" id="homeHeadlines">
+        <div style="color:var(--muted);font-size:13px;padding:20px 0">Loading...</div>
+      </div>
+    </div>
+  </div>
 
   <div class="onboard" id="onboard" role="dialog" aria-label="Welcome to News Flip">
     <div>
@@ -841,13 +1007,6 @@ body {
             <button class="font-size-btn" data-scale="1.15">L</button>
           </div>
         </div>
-        <div class="setting-row">
-          <span class="setting-label">Language</span>
-          <div class="font-sizes">
-            <button class="lang-btn active" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="es">ES</button>
-          </div>
-        </div>
       </div>
       <div class="profile-section">
         <div class="setting-row" style="cursor:pointer" onclick="openCollectionPage('liked')">
@@ -905,6 +1064,12 @@ body {
   </div>
 
 </div>
+
+<nav class="bottom-bar" role="navigation" aria-label="Main navigation">
+  <button class="bottom-btn active" data-nav="feed" aria-label="News cards"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></button>
+  <button class="bottom-btn" data-nav="home" aria-label="Home dashboard"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+  <button class="bottom-btn" data-nav="profile" aria-label="Profile and settings"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+</nav>
 
 <script>
 // ─── SUPABASE CONFIG ───────────────────────────────────────────────────────
@@ -1016,7 +1181,7 @@ const storedScale = localStorage.getItem('nf_font_scale');
 if (storedScale) {
   document.documentElement.style.setProperty('--font-scale', storedScale);
   const imgFlex = storedScale === '1.15' ? '28%' : storedScale === '0.9' ? '42%' : '38%';
-  document.documentElement.style.setProperty('--img-flex', imgFlex);
+  
   document.querySelectorAll('.font-size-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.scale === storedScale);
   });
@@ -1071,7 +1236,7 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
       const topCats = getTopCategories(3);
       const allResults = [];
       for (const tc of topCats) {
-        const catUrl = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=5&category=eq.${tc}&language=eq.${currentLang}`;
+        const catUrl = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&category=eq.${tc}`;
         const res = await fetch(catUrl, {
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
           signal: AbortSignal.timeout(5000)
@@ -1083,47 +1248,75 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
       }
       data = allResults;
       if (!data.length) throw new Error('No personalized stories yet');
-      // Sort by preference weight
       data.sort((a, b) => (prefs[b.category] || 0) - (prefs[a.category] || 0));
 
-    } else {
-      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&offset=${page * 10}&language=eq.${currentLang}`;
+    } else if (cat === 'trending') {
+      // SMART FEED: fetch 50 latest articles, then smart-sort
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=50`;
+      const res = await fetch(url, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+      if (!data || !data.length) throw new Error('Empty response');
 
-      if (cat === 'trending') {
-          url += `&is_trending=eq.true`;
-      } else if (cat === 'sports' && sub !== 'all') {
-          url += `&category=eq.sports&subcategory=eq.${sub}`;
+      // Score each article with multi-signal ranking
+      const now = Date.now();
+      const tier1 = ['reuters','associated press','ap news','bbc','cnn','nytimes','new york times','washington post','wall street journal','bloomberg','the guardian','npr','abc news','cbs news','nbc news','politico'];
+      
+      data.forEach(a => {
+        let score = 0;
+        // 1. Trending flag from pipeline (+35)
+        if (a.is_trending) score += 35;
+        // 2. Source tier (+20) — tier 1 sources rank higher
+        const src = (a.source || '').toLowerCase();
+        if (tier1.some(s => src.includes(s))) score += 20;
+        // 3. Freshness — articles under 3 hours get max boost, decays over 48 hours
+        const ageHours = (now - new Date(a.published_at).getTime()) / 3600000;
+        if (ageHours < 3) score += 30;
+        else if (ageHours < 12) score += 20;
+        else if (ageHours < 24) score += 10;
+        else score += Math.max(0, 5 - (ageHours * 0.1));
+        // 4. User preference boost
+        score += (prefs[a.category] || 0) * 0.5;
+        // 5. Image boost
+        if (a.image_url) score += 5;
+        // 6. Small randomness to keep feed fresh
+        score += Math.random() * 6;
+        a._score = score;
+      });
+
+      // Sort by score
+      data.sort((a, b) => b._score - a._score);
+
+      // Category diversity: don't show 3+ from same category in a row
+      data = diversifyCategories(data);
+
+    } else {
+      // Specific category
+      url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=30`;
+
+      if (cat === 'sports' && sub !== 'all') {
+        url += `&category=eq.sports&subcategory=eq.${sub}`;
       } else if (cat !== 'all') {
-          url += `&category=eq.${cat}`;
+        url += `&category=eq.${cat}`;
       }
 
       const res = await fetch(url, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         signal: AbortSignal.timeout(5000)
       });
-
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       data = await res.json();
       if (!data || !data.length) throw new Error('Empty response');
-    }
-
-    // Smart sorting: trending and all use weighted sort if user has prefs
-    if ((cat === 'trending' || cat === 'all') && Object.keys(prefs).length > 0) {
-      // Weighted sort — preferred categories float up, with some randomness
-      data.sort((a, b) => {
-        const wA = prefs[a.category] || 0;
-        const wB = prefs[b.category] || 0;
-        if (wA !== wB) return wB - wA;
-        return Math.random() - 0.5;
-      });
-    } else if (cat === 'trending' || cat === 'all') {
-      shuffleArray(data);
     }
 
     articles = data.map(a => ({
       id: a.id || a.url, category: a.category, title: a.title,
       summary: a.summary, full: a.full_text || '',
       source: a.source, time: relTime(a.published_at),
+      published_at: a.published_at,
       url: a.url, image_url: a.image_url || null,
     }));
   } catch (err) {
@@ -1135,6 +1328,38 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
   }
   currentIdx = 0;
   renderCard(articles[0]);
+}
+
+// Ensure no more than 2 articles from same category appear in a row
+function diversifyCategories(arr) {
+  const result = [];
+  const remaining = [...arr];
+  let lastCat = '';
+  let sameCatCount = 0;
+
+  while (remaining.length > 0) {
+    let picked = false;
+    for (let i = 0; i < remaining.length; i++) {
+      if (remaining[i].category !== lastCat || sameCatCount < 2) {
+        const item = remaining.splice(i, 1)[0];
+        if (item.category === lastCat) {
+          sameCatCount++;
+        } else {
+          sameCatCount = 1;
+          lastCat = item.category;
+        }
+        result.push(item);
+        picked = true;
+        break;
+      }
+    }
+    // If all remaining are same category, just add them
+    if (!picked) {
+      result.push(remaining.shift());
+      sameCatCount++;
+    }
+  }
+  return result;
 }
 
 // ─── RENDER CARD ───────────────────────────────────────────────────────────
@@ -1271,9 +1496,9 @@ async function loadMoreArticles() {
   loadingMore = true;
   currentPage++;
   try {
-    let url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=10&offset=${currentPage * 10}&language=eq.${currentLang}`;
+    let url = `${SUPABASE_URL}/rest/v1/articles?select=*&order=published_at.desc&limit=20&offset=${currentPage * 20}`;
     if (currentCat === 'trending') {
-        url += `&is_trending=eq.true`;
+        // Don't filter — trending tab shows all articles smart-sorted
     } else if (currentCat === 'sports' && currentSub !== 'all') {
         url += `&category=eq.sports&subcategory=eq.${currentSub}`;
     } else if (currentCat !== 'all') {
@@ -1698,7 +1923,7 @@ document.getElementById('searchInput').addEventListener('input', e => {
   searchTimer = setTimeout(async () => {
     results.innerHTML=`<div class="search-empty"><div class="search-empty-text" style="opacity:.5">Searching...</div></div>`;
     try {
-      const searchUrl = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&or=(title.ilike.*${encodeURIComponent(q)}*,source.ilike.*${encodeURIComponent(q)}*,summary.ilike.*${encodeURIComponent(q)}*)&language=eq.${currentLang}&order=published_at.desc&limit=20`;
+      const searchUrl = `${SUPABASE_URL}/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&or=(title.ilike.*${encodeURIComponent(q)}*,source.ilike.*${encodeURIComponent(q)}*,summary.ilike.*${encodeURIComponent(q)}*)&order=published_at.desc&limit=20`;
       const res = await fetch(searchUrl, {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
       });
@@ -1855,7 +2080,7 @@ document.querySelectorAll('.font-size-btn').forEach(btn => {
     document.documentElement.style.setProperty('--font-scale', scale);
     // Shrink image when text is larger to prevent overflow
     const imgFlex = scale === '1.15' ? '28%' : scale === '0.9' ? '42%' : '38%';
-    document.documentElement.style.setProperty('--img-flex', imgFlex);
+    
     localStorage.setItem('nf_font_scale', scale);
     // Re-render current card to apply
     if (articles[currentIdx]) renderCard(articles[currentIdx]);
@@ -1945,16 +2170,42 @@ document.getElementById('subTabs').addEventListener('click', e => {
 });
 
 // ─── BOTTOM BUTTONS ───────────────────────────────────────────────────────
+function showView(view) {
+  const homeScreen = document.getElementById('homeScreen');
+  const tabsScroll = document.querySelector('.tabs-scroll');
+  const subTabsWrap = document.getElementById('subTabsWrap');
+  const feedOuter = document.querySelector('.feed-outer');
+
+  if (view === 'home') {
+    homeScreen.classList.remove('hidden');
+    tabsScroll.style.display = 'none';
+    subTabsWrap.style.display = 'none';
+    feedOuter.style.display = 'none';
+    closeProfile();
+    closeCollectionPage();
+    closeSearch();
+    loadHomeDashboard();
+  } else if (view === 'feed') {
+    homeScreen.classList.add('hidden');
+    tabsScroll.style.display = '';
+    feedOuter.style.display = '';
+    if (currentCat === 'sports') subTabsWrap.style.display = '';
+    closeProfile();
+    closeCollectionPage();
+    closeSearch();
+  } else if (view === 'profile') {
+    closeSearch();
+    closeCollectionPage();
+    openProfile();
+  }
+}
+
 document.querySelectorAll('.bottom-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const nav=btn.dataset.nav;
-    // Close any open overlays first
-    closeSearch();
-    closeProfile();
-    if(nav==='search'){ openSearch(); return; }
-    if(nav==='profile'){ openProfile(); return; }
     document.querySelectorAll('.bottom-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
+    showView(nav);
   });
 });
 
@@ -1993,6 +2244,238 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
+// ─── HOME DASHBOARD ──────────────────────────────────────────────────────
+const DAILY_QUOTES = [
+  {text:"The unexamined life is not worth living.", author:"Socrates"},
+  {text:"We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author:"Aristotle"},
+  {text:"The only true wisdom is in knowing you know nothing.", author:"Socrates"},
+  {text:"Give me a lever long enough and a fulcrum on which to place it, and I shall move the world.", author:"Archimedes"},
+  {text:"Be kind, for everyone you meet is fighting a hard battle.", author:"Plato"},
+  {text:"No man is free who is not master of himself.", author:"Epictetus"},
+  {text:"He who is not a good servant will not be a good master.", author:"Plato"},
+  {text:"It is the mark of an educated mind to be able to entertain a thought without accepting it.", author:"Aristotle"},
+  {text:"The soul takes nothing with her to the next world but her education and her culture.", author:"Plato"},
+  {text:"Waste no more time arguing about what a good man should be. Be one.", author:"Marcus Aurelius"},
+  {text:"Man is the measure of all things.", author:"Protagoras"},
+  {text:"The beginning of wisdom is the definition of terms.", author:"Socrates"},
+  {text:"Happiness depends upon ourselves.", author:"Aristotle"},
+  {text:"Know thyself.", author:"Thales of Miletus"},
+  {text:"Eureka! I have found it!", author:"Archimedes"},
+  {text:"The mind is not a vessel to be filled, but a fire to be kindled.", author:"Plutarch"},
+  {text:"There is nothing permanent except change.", author:"Heraclitus"},
+  {text:"Courage is knowing what not to fear.", author:"Plato"},
+  {text:"You have power over your mind, not outside events. Realize this, and you will find strength.", author:"Marcus Aurelius"},
+  {text:"The whole is greater than the sum of its parts.", author:"Aristotle"},
+  {text:"Difficulties strengthen the mind, as labor does the body.", author:"Seneca"},
+  {text:"He who has a why to live can bear almost any how.", author:"Epictetus"},
+  {text:"Education is the kindling of a flame, not the filling of a vessel.", author:"Socrates"},
+  {text:"The obstacle is the way.", author:"Marcus Aurelius"},
+  {text:"To find yourself, think for yourself.", author:"Socrates"},
+  {text:"A great city is not to be confounded with a populous one.", author:"Aristotle"},
+  {text:"Nothing exists except atoms and empty space; everything else is opinion.", author:"Democritus"},
+  {text:"The measure of a man is what he does with power.", author:"Plato"},
+  {text:"It is not death that a man should fear, but he should fear never beginning to live.", author:"Marcus Aurelius"},
+  {text:"No great thing is created suddenly.", author:"Epictetus"},
+];
+
+function getDailyQuote() {
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+  return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
+}
+
+function loadHomeDashboard() {
+  console.log('Loading home dashboard...');
+  const hour = new Date().getHours();
+  let greeting = 'Good evening';
+  if (hour < 12) greeting = 'Good morning';
+  else if (hour < 17) greeting = 'Good afternoon';
+  document.getElementById('homeGreeting').textContent = greeting;
+
+  const opts = { weekday:'long', month:'long', day:'numeric' };
+  document.getElementById('homeDateLine').textContent = new Date().toLocaleDateString('en-US', opts);
+
+  const quote = getDailyQuote();
+  document.getElementById('homeQuote').innerHTML = '"' + quote.text + '"<div class="home-quote-author">\u2014 ' + quote.author + '</div>';
+
+  loadHomeWeather();
+  loadHomeTrending();
+}
+
+async function loadHomeWeather() {
+  const el = document.getElementById('homeWeather');
+  const savedCity = localStorage.getItem('nf_weather_city');
+
+  try {
+    let lat, lon, cityName;
+
+    if (savedCity) {
+      const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(savedCity) + '&count=1&language=en');
+      const geoData = await geoRes.json();
+      if (geoData.results && geoData.results.length) {
+        lat = geoData.results[0].latitude;
+        lon = geoData.results[0].longitude;
+        cityName = geoData.results[0].name;
+      } else throw new Error('City not found');
+    } else {
+      const geo = await new Promise(function(resolve, reject) {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {timeout:8000, enableHighAccuracy:false});
+      });
+      lat = geo.coords.latitude;
+      lon = geo.coords.longitude;
+      // Reverse geocode
+      try {
+        const revRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + lat.toFixed(2) + ',' + lon.toFixed(2) + '&count=1&language=en');
+        const revData = await revRes.json();
+        cityName = (revData.results && revData.results[0]) ? revData.results[0].name : 'Your location';
+      } catch(e2) { cityName = 'Your location'; }
+    }
+
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=temperature_2m,weather_code,apparent_temperature,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto');
+    const data = await res.json();
+    const c = data.current;
+    const icons = {0:'\u2600\uFE0F',1:'\uD83C\uDF24',2:'\u26C5',3:'\u2601\uFE0F',45:'\uD83C\uDF2B',51:'\uD83C\uDF26',53:'\uD83C\uDF27',61:'\uD83C\uDF27',63:'\uD83C\uDF27',71:'\uD83C\uDF28',73:'\u2744\uFE0F',80:'\uD83C\uDF26',82:'\u26C8',95:'\u26C8'};
+    const names = {0:'Clear',1:'Clear',2:'Cloudy',3:'Overcast',45:'Fog',51:'Drizzle',53:'Rain',61:'Rain',63:'Rain',71:'Snow',73:'Snow',80:'Showers',82:'Storm',95:'Thunder'};
+
+    el.innerHTML = '<div style="flex:1"><div style="display:flex;align-items:center;gap:10px"><span class="home-weather-temp">' + Math.round(c.temperature_2m) + '\u00B0 ' + (icons[c.weather_code]||'\uD83C\uDF24') + '</span><span class="home-weather-cond">' + (names[c.weather_code]||'--') + '</span></div><div style="font-size:11px;color:var(--muted);margin-top:4px">Feels ' + Math.round(c.apparent_temperature) + '\u00B0 \u00B7 Wind ' + Math.round(c.wind_speed_10m) + ' mph</div></div><span class="home-weather-city" onclick="openCityPicker()">' + cityName + '</span>';
+  } catch(e) {
+    el.innerHTML = '<div style="flex:1;display:flex;align-items:center;gap:10px"><span class="home-weather-temp">--\u00B0</span><span class="home-weather-cond">Tap to set city</span></div><span class="home-weather-city" onclick="openCityPicker()">Set city</span>';
+  }
+}
+
+// City picker
+function openCityPicker() {
+  document.getElementById('cityPicker').classList.add('open');
+  document.getElementById('cityInput').value = '';
+  document.getElementById('cityResults').innerHTML = '';
+  setTimeout(function() { document.getElementById('cityInput').focus(); }, 100);
+}
+function closeCityPicker() {
+  document.getElementById('cityPicker').classList.remove('open');
+}
+
+let citySearchTimer = null;
+document.addEventListener('DOMContentLoaded', function() {
+  const cityInput = document.getElementById('cityInput');
+  if (cityInput) {
+    cityInput.addEventListener('input', function() {
+      clearTimeout(citySearchTimer);
+      const q = cityInput.value.trim();
+      if (q.length < 2) { document.getElementById('cityResults').innerHTML = ''; return; }
+      citySearchTimer = setTimeout(async function() {
+        try {
+          const res = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=5&language=en');
+          const data = await res.json();
+          if (!data.results || !data.results.length) {
+            document.getElementById('cityResults').innerHTML = '<div style="padding:10px;color:var(--muted);font-size:13px">No cities found</div>';
+            return;
+          }
+          document.getElementById('cityResults').innerHTML = data.results.map(function(r) {
+            return '<div class="city-picker-result" onclick="selectCity(\'' + r.name.replace(/'/g,"\\'") + '\')">' +
+              '<div>' + r.name + '</div>' +
+              '<div class="city-picker-result-sub">' + (r.admin1 || '') + (r.admin1 && r.country ? ', ' : '') + (r.country || '') + '</div>' +
+            '</div>';
+          }).join('');
+        } catch(e) {
+          document.getElementById('cityResults').innerHTML = '<div style="padding:10px;color:var(--muted);font-size:13px">Search failed</div>';
+        }
+      }, 300);
+    });
+  }
+});
+
+function selectCity(name) {
+  localStorage.setItem('nf_weather_city', name);
+  closeCityPicker();
+  loadHomeWeather();
+}
+
+function useGpsLocation() {
+  localStorage.removeItem('nf_weather_city');
+  closeCityPicker();
+  loadHomeWeather();
+}
+
+async function loadHomeTrending() {
+  const el = document.getElementById('homeHeadlines');
+  try {
+    // Use the same articles array that the feed uses
+    if (articles && articles.length > 0) {
+      renderHomeStories(articles.slice(0, 10));
+      return;
+    }
+    // Fallback: fetch directly from Supabase
+    const url = SUPABASE_URL + '/rest/v1/articles?select=id,title,source,category,image_url,url,published_at&order=published_at.desc&limit=10';
+    const res = await fetch(url, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    console.log('Home stories fetched:', data.length);
+    if (!data || !data.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0">No stories yet</div>';
+      return;
+    }
+    renderHomeStories(data);
+  } catch(e) {
+    console.error('Home stories error:', e);
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0">Unable to load stories</div>';
+  }
+}
+
+let homeStories = [];
+
+function renderHomeStories(list) {
+  homeStories = list;
+  const el = document.getElementById('homeHeadlines');
+  el.innerHTML = list.map(function(a, idx) {
+    const title = a.title || '';
+    const source = a.source || '';
+    const cat = a.category || 'all';
+    const cfg = CAT_CONFIG[cat] || CAT_CONFIG.all;
+    const img = a.image_url || a.image || '';
+    const time = a.published_at ? relTime(a.published_at) : (a.time || '');
+    return '<div class="headline-item" onclick="goToStory(' + idx + ')">' +
+      '<div class="headline-item-body">' +
+        '<div class="headline-item-title">' + title + '</div>' +
+        '<div class="headline-item-meta"><span class="headline-item-cat" style="background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.label + '</span>' + source + ' \u00B7 ' + time + '</div>' +
+      '</div>' +
+      (img ? '<img class="headline-item-img" src="' + img + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+    '</div>';
+  }).join('');
+}
+
+function goToStory(idx) {
+  const story = homeStories[idx];
+  if (!story) return;
+  
+  // Switch to feed view
+  document.querySelectorAll('.bottom-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelector('[data-nav=feed]').classList.add('active');
+  showView('feed');
+  
+  // Convert to feed format and inject
+  const feedArticle = {
+    id: story.id, category: story.category, title: story.title,
+    summary: story.summary || '', full: story.full_text || '',
+    source: story.source, time: relTime(story.published_at),
+    published_at: story.published_at,
+    url: story.url, image_url: story.image_url || null,
+  };
+  
+  setTimeout(function() {
+    // Try to find in existing feed first
+    const existingIdx = articles.findIndex(function(a) { return a.id == story.id; });
+    if (existingIdx > -1) {
+      currentIdx = existingIdx;
+    } else {
+      // Insert at beginning of feed
+      articles.unshift(feedArticle);
+      currentIdx = 0;
+    }
+    renderCard(articles[currentIdx]);
+    updateProgress();
+  }, 200);
+}
 // ─── BOOT ──────────────────────────────────────────────────────────────────
 const _storyParam = new URLSearchParams(window.location.search).get('story');
 if (_storyParam) {
