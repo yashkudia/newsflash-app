@@ -26,14 +26,18 @@ let aiCallCount = 0;
 
 // ─── AI SUMMARIZE (DUAL PROVIDER) ──────────────────────────────────────────
 async function summarizeWithAI(article, retries = 3) {
-    const prompt = `You are an elite news editor for a mobile app. Analyze this article:
-Title: ${article.title}
-Content: ${(article.description || '')} ${(article.content || '').slice(0, 800)}
+    const prompt = `You are a senior news editor at a fast-paced mobile news app. Your readers are busy Americans who want to understand what happened in 10 seconds.
 
-Output a strict JSON object with exactly these 3 keys:
-"summary": A fast-paced, engaging summary of exactly around 60 words.
-"category": Choose the single most accurate category from this exact list: ["economy", "sports", "tech", "politics", "entertainment", "science", "health"]. If none fit perfectly, pick the closest one.
-"is_trending": true or false. Only mark true if this is a massive breaking story, highly viral, or a top national headline.`;
+Article:
+Title: ${article.title}
+Content: ${(article.description || '')} ${(article.content || '').slice(0, 1000)}
+
+Write a JSON object with these keys:
+"summary": Write exactly 50-65 words. Start with the most important fact — WHO did WHAT. Then add context — WHY it matters. End with what happens next or the bigger picture. Use active voice, short sentences. No filler words. Make every word count. Write like you're telling a smart friend who missed the news.
+"category": Pick ONE from: ["economy", "sports", "tech", "politics", "entertainment", "science", "health", "world"]. Use "world" for international/global stories.
+"is_trending": true only if this is a major breaking story that most Americans would care about.
+
+Output ONLY valid JSON, nothing else.`;
 
     // Alternate: even = Gemini, odd = Groq
     const useGemini = (aiCallCount % 2 === 0) && geminiModel;
@@ -123,7 +127,7 @@ async function fetchTopNews(category) {
     };
     const url = `https://newsdata.io/api/1/latest?apikey=${process.env.NEWSDATA_API_KEY}&country=us&language=en&category=${catMap[category]}`;
     try {
-        console.log(`  📡 NewsData: ${category.toUpperCase()}`);
+        console.log(`  📡 NewsData US: ${category.toUpperCase()}`);
         const res = await fetch(url);
         const data = await res.json();
         if (data.status !== 'success' || !data.results) {
@@ -145,6 +149,43 @@ async function fetchTopNews(category) {
         console.error(`  NewsData failed for ${category}:`, e.message);
         return [];
     }
+}
+
+async function fetchGlobalNews() {
+    // Fetch world news from major countries
+    const countries = ['gb', 'au', 'ca', 'de', 'fr'];
+    const countryName = { gb: 'UK', au: 'Australia', ca: 'Canada', de: 'Germany', fr: 'France' };
+    const allArticles = [];
+
+    for (const country of countries) {
+        const url = `https://newsdata.io/api/1/latest?apikey=${process.env.NEWSDATA_API_KEY}&country=${country}&language=en&category=top`;
+        try {
+            console.log(`  🌍 Global: ${countryName[country]}`);
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.status === 'success' && data.results) {
+                const articles = data.results
+                    .filter(item => item.title && item.title.length > 20)
+                    .slice(0, 3) // Top 3 per country
+                    .map(item => ({
+                        title: item.title,
+                        description: item.description || '',
+                        content: item.content || item.description || '',
+                        url: item.link,
+                        urlToImage: item.image_url || null,
+                        source: { name: item.source_id || countryName[country] },
+                        publishedAt: item.pubDate,
+                        isGlobal: true,
+                    }));
+                allArticles.push(...articles);
+            }
+            // Small delay between country fetches
+            await new Promise(r => setTimeout(r, 500));
+        } catch(e) {
+            console.error(`  Global failed for ${countryName[country]}:`, e.message);
+        }
+    }
+    return allArticles;
 }
 
 // ─── SAVE TO DATABASE ──────────────────────────────────────────────────────
@@ -206,6 +247,7 @@ async function runPipeline() {
     const categories = ['general', 'technology', 'sports', 'business', 'entertainment', 'science', 'health', 'politics'];
     let totalOk = 0, totalFail = 0, totalTrending = 0;
     
+    // US news by category
     for (const cat of categories) {
         console.log(`\n📂 ${cat.toUpperCase()}`);
         const raw = await fetchTopNews(cat);
@@ -215,7 +257,6 @@ async function runPipeline() {
             console.log(`  📰 ${article.title.slice(0, 55)}...`);
             const ai = await summarizeWithAI(article);
             if (ai && ai.summary) {
-                // Try to get image — fallback to OG scraping if none
                 let imageUrl = article.urlToImage;
                 if (!imageUrl) {
                     console.log(`    🖼️  No image, scraping OG...`);
@@ -240,6 +281,38 @@ async function runPipeline() {
         }
         if (batch.length) await saveToDatabase(batch);
     }
+
+    // Global / World news
+    console.log(`\n🌍 GLOBAL NEWS`);
+    const globalRaw = await fetchGlobalNews();
+    const globalBatch = [];
+    
+    for (const article of globalRaw) {
+        console.log(`  📰 ${article.title.slice(0, 55)}...`);
+        const ai = await summarizeWithAI(article);
+        if (ai && ai.summary) {
+            let imageUrl = article.urlToImage;
+            if (!imageUrl) {
+                imageUrl = await fetchOgImage(article.url);
+            }
+            const isTrending = calculateTrending(article, ai);
+            if (isTrending) totalTrending++;
+            // Force category to "world" for global articles
+            globalBatch.push({
+                title: article.title, summary: ai.summary,
+                full_text: article.content || "Read more at the source.",
+                source: article.source.name, url: article.url,
+                image_url: imageUrl,
+                category: 'world',
+                is_trending: isTrending,
+                published_at: article.publishedAt,
+                language: 'en'
+            });
+            totalOk++;
+        } else { totalFail++; }
+        await new Promise(r => setTimeout(r, 1500));
+    }
+    if (globalBatch.length) await saveToDatabase(globalBatch);
 
     console.log(`\n✨ DONE: ${totalOk} saved, ${totalFail} failed, ${totalTrending} trending`);
     console.log(`   AI calls: ${aiCallCount} (Gemini ~${Math.ceil(aiCallCount/2)} + Groq ~${Math.floor(aiCallCount/2)})`);

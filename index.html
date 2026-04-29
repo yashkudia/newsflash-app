@@ -1110,6 +1110,7 @@ const CAT_CONFIG = {
   trending:      { color:'#7eb8f7', bg:'rgba(126,184,247,.14)', label:'Trending',      bgDark:'#151c28' },
   foryou:        { color:'#f472b6', bg:'rgba(244,114,182,.14)', label:'For You',       bgDark:'#1e1020' },
   global:        { color:'#38bdf8', bg:'rgba(56,189,248,.14)', label:'Global',        bgDark:'#0c1824' },
+  world:         { color:'#38bdf8', bg:'rgba(56,189,248,.14)', label:'Global',        bgDark:'#0c1824' },
   sports:        { color:'#fbbf24', bg:'rgba(251,191,36,.13)',  label:'Sports',        bgDark:'#201a0a' },
   economy:       { color:'#68d391', bg:'rgba(104,211,145,.13)', label:'Economy',       bgDark:'#0e1e14' },
   entertainment: { color:'#f9a8d4', bg:'rgba(249,168,212,.13)',label:'Entertainment',  bgDark:'#1e1020' },
@@ -1320,6 +1321,8 @@ async function loadFeed(cat = 'trending', page = 0, sub = 'all') {
 
       if (cat === 'sports' && sub !== 'all') {
         url += `&category=eq.sports&subcategory=eq.${sub}`;
+      } else if (cat === 'global') {
+        url += `&category=eq.world`;
       } else if (cat !== 'all') {
         url += `&category=eq.${cat}`;
       }
